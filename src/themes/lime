@@ -1,0 +1,62 @@
+# Screen color
+screen_color = (BLACK,GREEN,OFF)
+
+# Shadow color
+shadow_color = (BLACK,BLACK,OFF)
+
+# Dialog box color
+dialog_color = (BLACK,WHITE,OFF)
+
+# Dialog box title color
+title_color = (BLUE,WHITE,ON)
+
+# Dialog box border color
+border_color = (WHITE,WHITE,ON)
+
+# Active button color
+button_active_color = (WHITE,GREEN,ON)
+
+# Inactive button color
+button_inactive_color = (GREEN,WHITE,OFF)
+
+# Active button key color
+button_key_active_color = (WHITE,GREEN,ON)
+
+# Inactive button key color
+button_key_inactive_color = (GREEN,WHITE,OFF)
+
+# Active button label color
+button_label_active_color = (WHITE,GREEN,ON)
+
+# Inactive button label color
+button_label_inactive_color = (GREEN,WHITE,OFF)
+
+# Menu box color
+menubox_color = (BLACK,WHITE,OFF)
+
+# Menu box border color
+menubox_border_color = (WHITE,WHITE,ON)
+
+# Item color
+item_color = (GREEN,WHITE,OFF)
+
+# Selected item color
+item_selected_color = (WHITE,GREEN,ON)
+
+# Tag color
+tag_color = (GREEN,WHITE,ON)
+
+# Selected tag color
+tag_selected_color = (WHITE,GREEN,ON)
+
+# Tag key color
+tag_key_color = (GREEN,WHITE,OFF)
+
+# Selected tag key color
+tag_key_selected_color = (WHITE,GREEN,ON)
+
+# Up arrow color
+uarrow_color = (GREEN,WHITE,ON)
+
+# Down arrow color
+darrow_color = (GREEN,WHITE,ON)

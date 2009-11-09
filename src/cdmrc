@@ -1,0 +1,67 @@
+############################
+### GLOBAL CONFIGURATION ###
+############################
+
+# Set CDM theme
+theme=default
+
+# List all WM binary names
+# globalbinlist=(gnome-session openbox-session awesome)
+wmbinlist=(awesome openbox-session)
+
+# List all WM display names
+# globaldisplist=(Gnome Openbox Awesome)
+wmdisplist=(Awesome Openbox)
+
+# Allow console login?
+allowconsole=yes
+
+# Set configuration for specific users?
+userconfig=(courtney)
+
+# Set default display
+display=0
+
+##########################
+### USER CONFIGURATION ###
+##########################
+
+courtney() {
+	# Set CDM theme
+	theme=lime
+
+	# List user allowed WM binary names
+	wmbinlist=(openbox-session)
+
+	# List user allowed WM display names
+	wmdisplist=(Openbox)
+
+	# Allow console login?
+	allowconsole=no
+
+	# Set specific display for user
+	display=1
+}
+
+############################
+### SYSTEM CONFIGURATION ###
+############################
+
+# Set first X tty (default is 7)
+xtty=7
+
+# Set default Window Manager
+defaultwm=xterm
+
+###################################
+### DO NOT EDIT BELOW THIS LINE ###
+###################################
+
+count=0
+
+while [[ ${count} -lt ${#userconfig[@]} ]]; do
+	if [[ "$USER" == "${userconfig[${count}]}" ]]; then
+		${userconfig[${count}]}
+	fi
+	let count=count+1
+done

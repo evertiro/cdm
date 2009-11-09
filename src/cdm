@@ -1,0 +1,118 @@
+#!/bin/bash
+#
+#   CDM: The Console Display Manager
+#
+#   Copyright (C) 2009, Daniel J Griffiths <ghost1227@archlinux.us>
+#   Thanks to:
+#
+#       This program is free software; you can redistribute it and/or modify
+#       it under the terms of the GNU General Public License as published by
+#       the Free Software Foundation; either version 2 of the License, or
+#       (at your option) any later version.
+#       
+#       This program is distributed in the hope that it will be useful,
+#       but WITHOUT ANY WARRANTY; without even the implied warranty of
+#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#       GNU General Public License for more details.
+#       
+#       You should have received a copy of the GNU General Public License
+#       along with this program; if not, write to the Free Software
+#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#       MA 02110-1301, USA.
+
+name="Console Display Manager"
+ver="0.1"
+info="\e[1;34m==>\e[1;37m"
+error="\e[1;31m==>\e[1;37m"
+success="\e[1;32m==>\e[1;37m"
+reset="\e[0m"
+trap "" 2 20
+
+# Drop root to console
+if [[ $EUID -eq 0 ]]; then
+	bash
+	exit 0
+fi
+
+# Source cdm configuration
+if [ -f /usr/share/cdm/cmdrc ]; then
+	source /usr/share/cdm/cdmrc
+else
+	echo -e "${error} ERROR: A valid cdm configuration was not found!${reset}"
+	echo -e "${info} Logging out.${reset}"
+	sleep 3
+	exit 1
+fi
+
+# Source theme file
+if [[ ! -z ${theme} ]]; then
+	if [[ -f /usr/share/cdm/themes/${theme} ]]; then
+		export DIALOGRC=/usr/share/cdm/themes/${theme}
+	else
+		echo -e "${info} Theme file ${theme} is invalid, reverting to default theme.${reset}"
+	fi
+elif [[ -f /usr/share/cdm/themes/default ]]; then
+	export DIALOGRC=/usr/share/cdm/themes/default
+else
+	echo -e "${info} A valid theme file was not found, using system defaults.${reset}"
+fi
+
+# Verify display exists
+if `echo ""${display}"" | grep [^0-9] &> /dev/null`; then
+	display=0
+fi
+
+# Check if X is already running
+xdpyinfo -display :${display}.0 &> /dev/null && \
+echo $? &> /dev/null
+
+# If X is already running, activate it
+if [[ `echo $?` != "1" ]]; then
+	let tty=${display}+${xtty}
+	chvt ${tty}
+	exit 0
+fi
+
+# Generate main menu
+count=0
+menu=$(
+	while [[ ${count} -lt ${#wmdisplist[@]} ]]; do
+		echo -ne "${count} ${wmdisplist[${count}]} "
+		let count=count+1
+	done
+)
+
+# Check if console access is allowed
+let console=${#wmdisplist[@]}
+if [[ ${allowconsole} == "yes" ]]; then
+	menu=$(echo -ne "${menu} ${console} Console ")
+fi
+
+# Override dialog display if only one option is available
+if [[ ${allowconsole} != "yes" ]] && [[ ${#wmdisplist[@]} == 1 ]]; then
+	wm=${wmbinlist[@]}
+else
+	# Display selection dialog
+	wm=$(
+		dialog --colors --backtitle "${name} v${ver}" --stdout \
+			--ok-label " Select " --cancel-label " Logout " \
+			--menu "Select Window Manager" 0 0 0 ${menu}
+	)
+fi
+
+# Set wm_bin
+if [[ $? == 0 ]]; then
+	clear
+	if [[ ${wm} -eq ${console} ]]; then
+		bash
+		exit 0
+	else
+		export wm_bin="${wmbinlist[${wm}]}"
+
+		# Start X
+		exec ck-launch-session startx -- :${display} &> /dev/null &
+	fi
+else
+	clear
+	exit 0
+fi

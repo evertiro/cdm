@@ -1,0 +1,65 @@
+# Screen color
+screen_color = (BLUE,BLACK,ON)
+
+# Shadow color
+shadow_color = (BLACK,BLUE,ON)
+
+# Dialog box color
+dialog_color = (BLUE,BLACK,OFF)
+
+# Dialog box title color
+title_color = (BLUE,WHITE,ON)
+
+# Dialog box border color
+border_color = (BLUE,BLACK,ON)
+
+# Active button color
+button_active_color = (CYAN,BLACK,ON)
+
+# Inactive button color
+button_inactive_color = (BLUE,BLACK,OFF)
+
+# Active button key color
+button_key_active_color = (BLUE,BLACK,ON)
+
+# Inactive button key color
+button_key_inactive_color = (BLUE,BLACK,OFF)
+
+# Active button label color
+button_label_active_color = (BLUE,BLACK,ON)
+
+# Inactive button label color
+button_label_inactive_color = (BLUE,BLACK,ON)
+
+# Menu box color
+menubox_color = (BLUE,BLACK,OFF)
+
+# Menu box border color
+menubox_border_color = (BLUE,BLACK,ON)
+
+# Item color
+item_color = (BLUE,BLACK,OFF)
+
+# Selected item color
+item_selected_color = (CYAN,BLACK,ON)
+
+# Tag color
+tag_color = (BLUE,BLACK,ON)
+
+# Selected tag color
+tag_selected_color = (CYAN,BLACK,ON)
+
+# Tag key color
+tag_key_color = (BLUE,BLACK,OFF)
+
+# Selected tag key color
+tag_key_selected_color = (CYAN,BLACK,ON)
+
+# Up arrow color
+uarrow_color = (BLUE,BLACK,ON)
+
+# Down arrow color
+darrow_color = (BLUE,BLACK,ON)
+
+# Active form text color
+form_active_text_color = (BLACK,BLUE,ON)
