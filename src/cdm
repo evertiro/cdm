@@ -35,8 +35,8 @@ if [[ $EUID -eq 0 ]]; then
 fi
 
 # Source cdm configuration
-if [ -f /usr/share/cdm/cmdrc ]; then
-	source /usr/share/cdm/cdmrc
+if [ -f /etc/cmdrc ]; then
+	source /etc/cdmrc
 else
 	echo -e "${error} ERROR: A valid cdm configuration was not found!${reset}"
 	echo -e "${info} Logging out.${reset}"
