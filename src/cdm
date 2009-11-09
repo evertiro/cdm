@@ -35,7 +35,7 @@ if [[ $EUID -eq 0 ]]; then
 fi
 
 # Source cdm configuration
-if [ -f /etc/cmdrc ]; then
+if [ -f /etc/cdmrc ]; then
 	source /etc/cdmrc
 else
 	echo -e "${error} ERROR: A valid cdm configuration was not found!${reset}"
