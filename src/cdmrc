@@ -3,7 +3,7 @@
 ############################
 
 # Set CDM theme
-theme=default
+theme=cdm
 
 # List all WM binary names
 # globalbinlist=(gnome-session openbox-session awesome)
