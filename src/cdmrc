@@ -17,7 +17,7 @@ wmdisplist=(Awesome Openbox)
 allowconsole=yes
 
 # Set configuration for specific users?
-userconfig=(courtney)
+# userconfig=(courtney)
 
 # Set default display
 display=0
@@ -26,22 +26,22 @@ display=0
 ### USER CONFIGURATION ###
 ##########################
 
-courtney() {
+# courtney() {
 	# Set CDM theme
-	theme=lime
+	# theme=lime
 
 	# List user allowed WM binary names
-	wmbinlist=(openbox-session)
+	# wmbinlist=(openbox-session)
 
 	# List user allowed WM display names
-	wmdisplist=(Openbox)
+	# wmdisplist=(Openbox)
 
 	# Allow console login?
-	allowconsole=no
+	# allowconsole=no
 
 	# Set specific display for user
-	display=1
-}
+	# display=1
+# }
 
 ############################
 ### SYSTEM CONFIGURATION ###
