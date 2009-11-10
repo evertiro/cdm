@@ -8,7 +8,9 @@ else
 	mkdir -p /usr/{bin,share/cdm}
 	install -m755 cdm /usr/bin/
 	install -Dm644 cdmrc /etc/cdmrc
-	cp -Rf skel themes /usr/share/cdm/
+	install -m644 xinitrc /usr/share/cdm/
+	install -Dm755 cdm-profile.sh /etc/profile.d/cdm-profile.sh
+	cp -Rf themes /usr/share/cdm/
 	echo "CDM configuration is done through /etc/cdmrc"
 	echo "Replace ~/.xinitrc and ~/.bash_profile with the files in /usr/share/cdm/skel for each user."
 fi
