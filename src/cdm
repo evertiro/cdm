@@ -30,7 +30,7 @@ trap "" 2 20
 
 # Drop root to console
 if [[ $EUID -eq 0 ]]; then
-	bash
+	${SHELL}
 	exit 0
 fi
 
@@ -104,13 +104,13 @@ fi
 if [[ $? == 0 ]]; then
 	clear
 	if [[ ${wm} -eq ${console} ]]; then
-		bash
+		${SHELL}
 		exit 0
 	else
 		export wm_bin="${wmbinlist[${wm}]}"
 
 		# Start X
-		exec ck-launch-session startx -- :${display} &> /dev/null &
+		exec ck-launch-session startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
 	fi
 else
 	clear
