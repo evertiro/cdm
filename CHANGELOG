@@ -4,3 +4,7 @@ Version 0.1 (2009-11-09)
 Version 0.1b (2009-11-09)
 	- Minor feature addition
 	- No longer requires editing user files
+
+Version 0.2 (2009-11-10)
+	- Added shutdown option
+	- Added ability to set login shell (fix for some foreign layouts)
