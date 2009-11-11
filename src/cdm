@@ -21,7 +21,7 @@
 #       MA 02110-1301, USA.
 
 name="Console Display Manager"
-ver="0.1"
+ver="0.2"
 info="\e[1;34m==>\e[1;37m"
 error="\e[1;31m==>\e[1;37m"
 success="\e[1;32m==>\e[1;37m"
@@ -73,46 +73,86 @@ if [[ `echo $?` != "1" ]]; then
 	exit 0
 fi
 
-# Generate main menu
-count=0
-menu=$(
-	while [[ ${count} -lt ${#wmdisplist[@]} ]]; do
-		echo -ne "${count} ${wmdisplist[${count}]} "
-		let count=count+1
-	done
-)
-
-# Check if console access is allowed
-let console=${#wmdisplist[@]}
-if [[ ${allowconsole} == "yes" ]]; then
-	menu=$(echo -ne "${menu} ${console} Console ")
-fi
-
-# Override dialog display if only one option is available
-if [[ ${allowconsole} != "yes" ]] && [[ ${#wmdisplist[@]} == 1 ]]; then
-	wm=${wmbinlist[@]}
-else
-	# Display selection dialog
-	wm=$(
-		dialog --colors --backtitle "${name} v${ver}" --stdout \
-			--ok-label " Select " --cancel-label " Logout " \
-			--menu "Select Window Manager" 0 0 0 ${menu}
+mainmenu() {
+	# Generate main menu
+	count=0
+	menu=$(
+		while [[ ${count} -lt ${#wmdisplist[@]} ]]; do
+			echo -ne "${count} ${wmdisplist[${count}]} "
+			let count=count+1
+		done
 	)
-fi
 
-# Set wm_bin
-if [[ $? == 0 ]]; then
-	clear
-	if [[ ${wm} -eq ${console} ]]; then
-		${SHELL}
-		exit 0
-	else
-		export wm_bin="${wmbinlist[${wm}]}"
-
-		# Start X
-		exec ck-launch-session startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
+	# Check if console access is allowed
+	if [[ ${allowconsole} == "yes" ]]; then
+		let console=${#wmdisplist[@]}
+		menu=$(echo -ne "${menu} ${console} Console ")
 	fi
-else
-	clear
-	exit 0
-fi
+
+	# Check if shutdown access is allowed
+	if [[ ${allowshutdown} == "yes" ]]; then
+		if [[ ${allowconsole} != "yes" ]]; then
+			let halt=${#wmdisplist[@]}
+		else
+			let halt=${#wmdisplist[@]}+1
+		fi
+		menu=$(echo -ne "${menu} ${halt} Shutdown ")
+	fi	
+
+	# Override dialog display if only one option is available
+	if [[ ${allowconsole} != "yes" ]] && [[ ${#wmdisplist[@]} == 1 ]]; then
+		wm=${wmbinlist[@]}
+	else
+		# Display selection dialog
+		wm=$(
+			dialog --colors --backtitle "${name} v${ver}" --stdout \
+				--ok-label " Select " --cancel-label " Logout " \
+				--menu "Select Window Manager" 0 0 0 ${menu}
+		)	
+	fi
+
+	# Set wm_bin
+	if [[ $? == 0 ]]; then
+		clear
+		if [[ ${wm} -eq ${console} ]]; then
+			${SHELL}
+			exit 0
+		elif [[ ${wm} -eq ${halt} ]]; then
+			shutdownmenu
+		else
+			export wm_bin="${wmbinlist[${wm}]}"
+
+			# Start X
+			if [[ ${loginshell} == "yes" ]]; then
+				exec ck-launch-session bash --login -c startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
+			else
+				exec ck-launch-session startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
+			fi
+		fi
+	else
+		clear
+		exit 0
+	fi
+}
+
+shutdownmenu() {
+	# Display shutdown dialog
+	haltopt=$(
+		dialog --colors --backtitle "${name} v${ver}" --stdout \
+			--ok-label " Select " --cancel-label " Cancel " \
+			--menu "Shutdown" 0 0 0 0 Shutdown 1 Reboot
+	)
+	
+	if [[ $? == 0 ]]; then
+		clear
+		if [[ ${haltopt} -eq 0 ]]; then
+			${shutdowncommand}
+		else
+			${rebootcommand}
+		fi
+	else
+		mainmenu
+	fi
+}
+
+mainmenu
