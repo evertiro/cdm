@@ -122,6 +122,11 @@ mainmenu() {
 		else
 			export wm_bin="${wmbinlist[${wm}]}"
 
+			# Fix for gnome-session (I hope)
+			if [[ ${wm_bin} == "gnome-session" ]]; then
+				export wm_bin="dbus-launch gnome-session"
+			fi
+
 			# Start X
 			if [[ ${loginshell} == "yes" ]]; then
 				exec ck-launch-session bash --login -c startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
