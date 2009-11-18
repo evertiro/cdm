@@ -57,20 +57,29 @@ else
 	echo -e "${info} A valid theme file was not found, using system defaults.${reset}"
 fi
 
-# Verify display exists
-if `echo ""${display}"" | grep [^0-9] &> /dev/null`; then
+# If X is already running and locktty=yes, activate it,
+# otherwise, increment.
+if [[ ${locktty} == "yes" ]]; then
+	# Verify display exists
+	if `echo ""${display}"" | grep [^0-9] &> /dev/null`; then
+		display=0
+	fi
+	# Activate existing X session
+	if [[ `xdpyinfo -display :${display}.0 &> /dev/null` != "1" ]]; then
+		let tty=${display}+${xtty}
+		chvt ${tty}
+		exit 0
+	fi
+else
+	# Get the first empty display
 	display=0
-fi
-
-# Check if X is already running
-xdpyinfo -display :${display}.0 &> /dev/null && \
-echo $? &> /dev/null
-
-# If X is already running, activate it
-if [[ `echo $?` != "1" ]]; then
-	let tty=${display}+${xtty}
-	chvt ${tty}
-	exit 0
+	while ${display} < 7; do
+		if [[ `xdpyinfo -display :${display}.0 &> /dev/null` != "1" ]]; then
+			let display=${display}+1
+		else
+			break
+		fi
+	done
 fi
 
 mainmenu() {
@@ -108,38 +117,23 @@ mainmenu() {
 			dialog --colors --backtitle "${name} v${ver}" --stdout \
 				--ok-label " Select " --cancel-label " Logout " \
 				--menu "Select Window Manager" 0 0 0 ${menu}
-		)	
+		)
+		if [[ $? != 0 ]]; then
+			clear
+			exit 0
+		fi
 	fi
 
 	# Set wm_bin
-	if [[ $? == 0 ]]; then
-		clear
-		if [[ ${wm} -eq ${console} ]]; then
-			${SHELL}
-			exit 0
-		elif [[ ${wm} -eq ${halt} ]]; then
-			shutdownmenu
-		else
-			export wm_bin="${wmbinlist[${wm}]}"
-
-			# Start X
-			if [[ ${loginshell} == "yes" ]]; then
-				if [[ ${wm_bin} == "gnome-session" ]]; then
-					exec bash --login -c startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
-				else
-					exec ck-launch-session bash --login -c startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
-				fi
-			else
-				if [[ ${wm_bin} == "gnome-session" ]]; then
-					exec startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
-				else
-					exec ck-launch-session startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
-				fi
-			fi
-		fi
-	else
-		clear
+	clear
+	if [[ ${wm} -eq ${console} ]]; then
+		${SHELL}
 		exit 0
+	elif [[ ${wm} -eq ${halt} ]]; then
+		shutdownmenu
+	else
+		export wm_bin="${wmbinlist[${wm}]}"
+		xstart
 	fi
 }
 
@@ -163,4 +157,20 @@ shutdownmenu() {
 	fi
 }
 
+xstart() {
+	# Start X
+	if [[ ${loginshell} == "yes" ]]; then
+		if [[ ${wm_bin} == "gnome-session" ]]; then
+			exec bash --login -c startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
+		else
+			exec ck-launch-session bash --login -c startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
+		fi
+	else
+		if [[ ${wm_bin} == "gnome-session" ]]; then
+			exec startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
+		else
+			exec ck-launch-session startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
+		fi
+	fi
+}
 mainmenu

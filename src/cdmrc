@@ -22,9 +22,6 @@ rebootcommand='sudo shutdown -r now'
 # Set configuration for specific users?
 userconfig=(courtney)
 
-# Set default display
-display=0
-
 ##########################
 ### USER CONFIGURATION ###
 ##########################
@@ -40,21 +37,30 @@ courtney() {
 	wmdisplist=(Openbox)
 
 	# Allow console login?
-	allowconsole=no
+	allowconsole=yes
 
 	# Allow shutdown?
 	allowshutdown=no
 
 	# Set specific display for user
-	display=1
+	# (Not used unless restricttty=yes)
+	# display=1
 }
 
 ############################
 ### SYSTEM CONFIGURATION ###
 ############################
 
+# Set default display
+display=0
+
 # Set first X tty (default is 7)
 xtty=7
+
+# Restrict tty? (By default, cdm increments X tty, this setting
+# allows administrators to lock users into one specific tty by
+# setting the display=x option on a per-user basis.)
+locktty=no
 
 # Set default Window Manager
 defaultwm=xterm
