@@ -4,6 +4,9 @@
 #
 #   Copyright (C) 2009, Daniel J Griffiths <ghost1227@archlinux.us>
 #   Thanks to:
+#	Andrwe..........beta-testing and submitting the fix for the all 
+#			important X incrementation function
+#	brisbin33.......code cleanup
 #
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -61,11 +64,11 @@ fi
 # otherwise, increment.
 if [[ ${locktty} == "yes" ]]; then
 	# Verify display exists
-	if `echo ""${display}"" | grep [^0-9] &> /dev/null`; then
+	if [ -n "${display//[0-9]/}" ]; then
 		display=0
 	fi
 	# Activate existing X session
-	if [[ `xdpyinfo -display :${display}.0 &> /dev/null` != "1" ]]; then
+	if xdpyinfo -display :${display}.0 &> /dev/null; then
 		let tty=${display}+${xtty}
 		chvt ${tty}
 		exit 0
@@ -73,8 +76,8 @@ if [[ ${locktty} == "yes" ]]; then
 else
 	# Get the first empty display
 	display=0
-	while ${display} < 7; do
-		if [[ `xdpyinfo -display :${display}.0 &> /dev/null` != "1" ]]; then
+	while [ ${display} -lt 7 ]; do
+		if xdpyinfo -display :${display}.0 &> /dev/null; then
 			let display=${display}+1
 		else
 			break
@@ -94,6 +97,9 @@ mainmenu() {
 
 	# Check if console access is allowed
 	if [[ ${allowconsole} == "yes" ]]; then
+		if [[ ${allowshutdown} != "yes" ]]; then
+			let halt=99
+		fi
 		let console=${#wmdisplist[@]}
 		menu=$(echo -ne "${menu} ${console} Console ")
 	fi
@@ -106,10 +112,12 @@ mainmenu() {
 			let halt=${#wmdisplist[@]}+1
 		fi
 		menu=$(echo -ne "${menu} ${halt} Shutdown ")
-	fi	
+	fi
+	
+	echo "halt=${halt} console=${console} wm='${wm}'" > ~/cdm.tmp
 
 	# Override dialog display if only one option is available
-	if [[ ${allowconsole} != "yes" ]] && [[ ${#wmdisplist[@]} == 1 ]]; then
+	if [[ ${allowconsole} != "yes" ]] && [[ ${allowshutdown} != "yes" ]] && [[ ${#wmdisplist[@]} == 1 ]]; then
 		wm=${wmbinlist[@]}
 	else
 		# Display selection dialog
@@ -159,14 +167,14 @@ shutdownmenu() {
 
 xstart() {
 	# Start X
-	if [[ ${loginshell} == "yes" ]]; then
-		if [[ ${wm_bin} == "gnome-session" ]]; then
-			exec bash --login -c startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
+	if [ ${loginshell} == "yes" ]; then
+		if [ ${wm_bin} == "gnome-session" ]; then
+			exec bash --login -c "startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null" &
 		else
-			exec ck-launch-session bash --login -c startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
+			exec ck-launch-session bash --login -c "startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null" &
 		fi
 	else
-		if [[ ${wm_bin} == "gnome-session" ]]; then
+		if [ ${wm_bin} == "gnome-session" ]; then
 			exec startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
 		else
 			exec ck-launch-session startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &

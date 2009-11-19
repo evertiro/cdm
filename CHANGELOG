@@ -8,3 +8,9 @@ Version 0.1b (2009-11-09)
 Version 0.2 (2009-11-10)
 	- Added shutdown option
 	- Added ability to set login shell (fix for some foreign layouts)
+
+Version 0.3 (2009-11-18)
+	- Fixed X incrementing function (thanks Andrwe)
+	- Fixed an issue with allowshutdown off and allowconsole on
+	- Code cleanup (thanks Brisbin33)
+	- Fixed issue with profile.d execution order
