@@ -114,8 +114,6 @@ mainmenu() {
 		menu=$(echo -ne "${menu} ${halt} Shutdown ")
 	fi
 	
-	echo "halt=${halt} console=${console} wm='${wm}'" > ~/cdm.tmp
-
 	# Override dialog display if only one option is available
 	if [[ ${allowconsole} != "yes" ]] && [[ ${allowshutdown} != "yes" ]] && [[ ${#wmdisplist[@]} == 1 ]]; then
 		wm=${wmbinlist[@]}
