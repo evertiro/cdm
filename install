@@ -9,6 +9,6 @@ else
 	install -m755 cdm /usr/bin/
 	install -Dm644 cdmrc /etc/cdmrc
 	install -m644 xinitrc /usr/share/cdm/
-	install -Dm755 cdm-profile.sh /etc/profile.d/cdm-profile.sh
+	install -Dm755 zzz-cdm-profile.sh /etc/profile.d/zzz-cdm-profile.sh
 	cp -Rf themes /usr/share/cdm/
 fi

@@ -24,18 +24,12 @@
 #       MA 02110-1301, USA.
 
 name="Console Display Manager"
-ver="0.2"
+ver="0.3.1"
 info="\e[1;34m==>\e[1;37m"
 error="\e[1;31m==>\e[1;37m"
 success="\e[1;32m==>\e[1;37m"
 reset="\e[0m"
 trap "" 2 20
-
-# Drop root to console
-if [[ $EUID -eq 0 ]]; then
-	${SHELL}
-	exit 0
-fi
 
 # Source cdm configuration
 if [ -f /etc/cdmrc ]; then
@@ -114,6 +108,8 @@ mainmenu() {
 		menu=$(echo -ne "${menu} ${halt} Shutdown ")
 	fi
 	
+	echo "halt=${halt} console=${console} wm='${wm}'" > ~/cdm.tmp
+
 	# Override dialog display if only one option is available
 	if [[ ${allowconsole} != "yes" ]] && [[ ${allowshutdown} != "yes" ]] && [[ ${#wmdisplist[@]} == 1 ]]; then
 		wm=${wmbinlist[@]}
