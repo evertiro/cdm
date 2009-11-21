@@ -24,7 +24,7 @@
 #       MA 02110-1301, USA.
 
 name="Console Display Manager"
-ver="0.3.1"
+ver="0.3.2"
 info="\e[1;34m==>\e[1;37m"
 error="\e[1;31m==>\e[1;37m"
 success="\e[1;32m==>\e[1;37m"
@@ -140,19 +140,28 @@ mainmenu() {
 }
 
 shutdownmenu() {
+	haltmenu="0 Shutdown 1 Reboot"
+
+	# Check if suspend is enabled
+	if [[ ${allowsuspend} == "yes" ]]; then
+		haltmenu=$(echo -n "${haltmenu} 2 Suspend ")
+	fi
+
 	# Display shutdown dialog
 	haltopt=$(
 		dialog --colors --backtitle "${name} v${ver}" --stdout \
 			--ok-label " Select " --cancel-label " Cancel " \
-			--menu "Shutdown" 0 0 0 0 Shutdown 1 Reboot
+			--menu "Shutdown" 0 0 0 ${haltmenu}
 	)
 	
 	if [[ $? == 0 ]]; then
 		clear
 		if [[ ${haltopt} -eq 0 ]]; then
 			${shutdowncommand}
-		else
+		elif [[ ${haltopt} -eq 1 ]]; then
 			${rebootcommand}
+		else
+			${suspendcommand}
 		fi
 	else
 		mainmenu

@@ -19,6 +19,12 @@ allowshutdown=yes
 shutdowncommand='sudo shutdown -h now'
 rebootcommand='sudo shutdown -r now'
 
+# Allow suspend?
+# Note that this option requires pm-utils
+# to be installed and properly configured.
+allowsuspend=yes
+suspendcommand='sudo pm-suspend'
+
 # Set configuration for specific users?
 userconfig=(courtney)
 

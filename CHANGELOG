@@ -14,3 +14,10 @@ Version 0.3 (2009-11-18)
 	- Fixed an issue with allowshutdown off and allowconsole on
 	- Code cleanup (thanks Brisbin33)
 	- Fixed issue with profile.d execution order
+
+Version 0.3.1 (2009-11-20)
+	- Added failsafe to startup script that overrides execution if
+	  logged in as root
+
+Version 0.3.2 (2009-11-21)
+	- Added suspend option
