@@ -1,0 +1,73 @@
+# Theme: ed
+# Created by: Andrwe
+
+# Set aspect-ration.
+aspect = 0
+
+# Shadow dialog boxes? This also turns on color.
+use_shadow = ON
+
+# Turn color support ON or OFF
+use_colors = ON
+
+# Screen color
+screen_color = (WHITE,GREEN,ON)
+
+# Shadow color
+shadow_color = (GREEN,WHITE,ON)
+
+# Dialog box color
+dialog_color = (WHITE,GREEN,ON)
+
+# Dialog box title color
+title_color = (BLUE,GREEN,ON)
+
+# Dialog box border color
+border_color = (WHITE,GREEN,ON)
+
+# Active button color
+button_active_color = (GREEN,WHITE,OFF)
+
+# Inactive button color
+button_inactive_color = (WHITE,GREEN,OFF)
+
+# Active button key color
+button_key_active_color = (RED,WHITE,ON)
+
+# Inactive button key color
+button_key_inactive_color = (BLACK,GREEN,OFF)
+
+# Active button label color
+button_label_active_color = (BLACK,WHITE,ON)
+
+# Inactive button label color
+button_label_inactive_color = (RED,GREEN,OFF)
+
+# File position indicator color
+position_indicator_color = (BLACK,WHITE,ON)
+
+# Menu box color
+menubox_color = (WHITE,GREEN,ON)
+
+# Menu box border color
+menubox_border_color = (WHITE,GREEN,ON)
+
+# Item color
+item_color = (BLACK,GREEN,OFF)
+
+# Selected item color
+item_selected_color = (BLACK,WHITE,ON)
+
+# Tag key color
+tag_key_color = (RED,GREEN,OFF)
+
+# Selected tag key color
+tag_key_selected_color = (RED,WHITE,ON)
+
+# Up arrow color
+uarrow_color = (WHITE,GREEN,ON)
+
+# Down arrow color
+darrow_color = (WHITE,GREEN,ON)
+Last edited by Andrwe (To
+

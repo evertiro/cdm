@@ -1,0 +1,65 @@
+# Theme name: Haze
+# Created by: Andrwe
+
+# Set aspect-ration.
+aspect = 0
+
+# Shadow dialog boxes? This also turns on color.
+use_shadow = OFF
+
+# Turn color support ON or OFF
+use_colors = ON
+
+# Screen color
+screen_color = (YELLOW,BLACK,ON)
+
+# Dialog box color
+dialog_color = (YELLOW,BLACK,ON)
+
+# Dialog box border color
+border_color = (YELLOW,BLACK,ON)
+
+# Active button color
+button_active_color = (BLACK,BLACK,OFF)
+
+# Inactive button color
+button_inactive_color = (BLACK,BLACK,OFF)
+
+# Active button key color
+button_key_active_color = (YELLOW,BLACK,ON)
+
+# Inactive button key color
+button_key_inactive_color = (MAGENTA,BLACK,OFF)
+
+# Active button label color
+button_label_active_color = (MAGENTA,BLACK,ON)
+
+# Inactive button label color
+button_label_inactive_color = (YELLOW,BLACK,OFF)
+
+# File position indicator color
+position_indicator_color = (YELLOW,BLACK,ON)
+
+# Menu box color
+menubox_color = (YELLOW,MAGENTA,ON)
+
+# Menu box border color
+menubox_border_color = (YELLOW,MAGENTA,ON)
+
+# Item color
+item_color = (YELLOW,MAGENTA,OFF)
+
+# Selected item color
+item_selected_color = (YELLOW,BLACK,OFF)
+
+# Tag key color
+tag_key_color = (YELLOW,MAGENTA,OFF)
+
+# Selected tag key color
+tag_key_selected_color = (YELLOW,BLACK,OFF)
+
+# Up arrow color
+uarrow_color = (YELLOW,MAGENTA,ON)
+
+# Down arrow color
+darrow_color = (YELLOW,MAGENTA,ON)
