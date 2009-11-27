@@ -7,6 +7,7 @@
 #	Andrwe..........beta-testing and submitting the fix for the all 
 #			important X incrementation function
 #	brisbin33.......code cleanup
+#	tigrmesh........finding a critical issue with the gnome-session handler
 #
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -24,7 +25,7 @@
 #       MA 02110-1301, USA.
 
 name="Console Display Manager"
-ver="0.3.2"
+ver="0.3.3"
 info="\e[1;34m==>\e[1;37m"
 error="\e[1;31m==>\e[1;37m"
 success="\e[1;32m==>\e[1;37m"
@@ -172,15 +173,15 @@ xstart() {
 	# Start X
 	if [ ${loginshell} == "yes" ]; then
 		if [ ${wm_bin} == "gnome-session" ]; then
-			exec bash --login -c "startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null" &
-		else
 			exec ck-launch-session bash --login -c "startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null" &
+		else
+			exec bash --login -c "startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null" &
 		fi
 	else
 		if [ ${wm_bin} == "gnome-session" ]; then
-			exec startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
-		else
 			exec ck-launch-session startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
+		else
+			exec startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
 		fi
 	fi
 }

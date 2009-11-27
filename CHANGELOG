@@ -21,3 +21,6 @@ Version 0.3.1 (2009-11-20)
 
 Version 0.3.2 (2009-11-21)
 	- Added suspend option
+
+Version 0.3.3 (2009-11-26)
+	- Fixed issue with gnome-session handler
