@@ -42,7 +42,7 @@ if [[ -f /etc/cdmrc ]]; then
 	source /etc/cdmrc
 	count=0
 	while [[ ${count} -lt ${#userconfig[@]} ]]; do
-		if [[ "$USER" == "${#userconfig[${count}]}" ]]; then
+		if [[ "$USER" == "${userconfig[${count}]}" ]]; then
 			${userconfig[${count}]}
 		fi
 		let count=count+1
@@ -141,7 +141,7 @@ mainmenu() {
 
 	# Check if console access is allowed
 	if $(checkyesno allowconsole); then
-		if $(checkyesno allowshutdown); then
+		if ! $(checkyesno allowshutdown); then
 			let halt=99
 		fi
 		let console=${#wmdisplist[@]}+countfrom
@@ -150,7 +150,7 @@ mainmenu() {
 
 	# Check if shutdown access is allowed
 	if $(checkyesno allowshutdown); then
-		if $(checkyesno allowconsole); then
+		if ! $(checkyesno allowconsole); then
 			let halt=${#wmdisplist[@]}
 		else
 			let halt=${#wmdisplist[@]}+1
@@ -235,15 +235,15 @@ xstart() {
 
 	if $(checkyesno loginshell); then
 		if [[ ${wm_bin} == "gnome-session" ]]; then
-			exec ck-launch-session bash --login -c "startx $wm_bin -- :${serverargs} &> /dev/null" &
+			exec ck-launch-session bash --login -c "startx $wm_bin -- ${serverargs} &> /dev/null" &
 		else
-			exec bash --login -c "startx $wm_bin -- :${serverargs} &> /dev/null" &
+			exec bash --login -c "startx $wm_bin -- ${serverargs} &> /dev/null" &
 		fi
 	else
 		if [[ ${wm_bin} == "gnome-session" ]]; then
-			exec ck-launch-session startx $wm_bin -- :${serverargs} &> /dev/null &
+			exec ck-launch-session startx $wm_bin -- ${serverargs} &> /dev/null &
 		else
-			exec startx $wm_bin -- :${serverargs} &> /dev/null &
+			exec startx $wm_bin -- ${serverargs} &> /dev/null &
 		fi
 	fi
 }
