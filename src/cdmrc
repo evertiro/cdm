@@ -2,8 +2,9 @@
 ### GLOBAL CONFIGURATION ###
 ############################
 
-# Set CDM theme
+# Set CDM theme and dialog options
 theme=cdm
+countfrom=0
 
 # List all WM binary names
 wmbinlist=(awesome openbox-session)
@@ -49,7 +50,7 @@ courtney() {
 	allowshutdown=no
 
 	# Set specific display for user
-	# (Not used unless restricttty=yes)
+	# (Not honored unless locktty=yes)
 	# display=1
 }
 
@@ -60,29 +61,22 @@ courtney() {
 # Set default display
 display=0
 
-# Set first X tty (default is 7)
+# Where should first X tty be spawned?
 xtty=7
 
 # Restrict tty? (By default, cdm increments X tty, this setting
 # allows administrators to lock users into one specific tty by
-# setting the display=x option on a per-user basis.)
+# setting the display=N option on a per-user basis.)
 locktty=no
 
-# Set default Window Manager
-defaultwm=xterm
-
-# Enable login shell (fixes issues with some keymaps, requires bash)
+# Enable login shell (fixes issues with some keymaps, uses bash)
 loginshell=no
 
-###################################
-### DO NOT EDIT BELOW THIS LINE ###
-###################################
+# Use ~/.xinitrc when it exists, or /etc/X11/xinit/xinitrc when
+# it doesn't. If no, then we instead call the chosen window
+# manager directly.
+usexinit=no
 
-count=0
-
-while [[ ${count} -lt ${#userconfig[@]} ]]; do
-	if [[ "$USER" == "${userconfig[${count}]}" ]]; then
-		${userconfig[${count}]}
-	fi
-	let count=count+1
-done
+# Additional arguments to pass to X server; it will be called as:
+#	exec /usr/bin/X :$display $serverargs vt$((xtty+display))
+serverargs="-nolisten tcp -dpi 96"

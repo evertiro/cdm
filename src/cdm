@@ -30,11 +30,24 @@ info="\e[1;34m==>\e[1;37m"
 error="\e[1;31m==>\e[1;37m"
 success="\e[1;32m==>\e[1;37m"
 reset="\e[0m"
+# Ignore SIGINT (^C) and SIGTSTP (^Z)
 trap "" 2 20
+userclientrc=$HOME/.xinitrc
+sysclientrc=/etc/X11/xinit/xinitrc
+# userserverrc=$HOME/.xserverrc
+# sysserverrc=/etc/X11/xinit/xserverrc
 
 # Source cdm configuration
-if [ -f /etc/cdmrc ]; then
+if [[ -f /etc/cdmrc ]]; then
 	source /etc/cdmrc
+	count=0
+	while [[ ${count} -lt ${#userconfig[@]} ]]; do
+		if [[ "$USER" == "${#userconfig[${count}]}" ]]; then
+			${userconfig[${count}]}
+		fi
+		let count=count+1
+	done
+	countfrom=${countfrom:-0}
 else
 	echo -e "${error} ERROR: A valid cdm configuration was not found!${reset}"
 	echo -e "${info} Logging out.${reset}"
@@ -42,38 +55,74 @@ else
 	exit 1
 fi
 
+unset DIALOGRC
 # Source theme file
 if [[ ! -z ${theme} ]]; then
 	if [[ -f /usr/share/cdm/themes/${theme} ]]; then
-		export DIALOGRC=/usr/share/cdm/themes/${theme}
+		DIALOGRC=/usr/share/cdm/themes/${theme}
 	else
 		echo -e "${info} Theme file ${theme} is invalid, reverting to default theme.${reset}"
 	fi
-elif [[ -f /usr/share/cdm/themes/default ]]; then
-	export DIALOGRC=/usr/share/cdm/themes/default
-else
-	echo -e "${info} A valid theme file was not found, using system defaults.${reset}"
 fi
+# Fall back on defaults if valid theme isn't found
+if [[ -z $DIALOGRC ]]; then
+	if [[ -f /usr/share/cdm/themes/default ]]; then
+		DIALOGRC=/usr/share/cdm/themes/default
+	else
+		echo -e "${info} A valid theme file was not found, using system defaults.${reset}"
+	fi
+fi
+
+# Based on FreeBSD's /etc/rc.subr
+#
+# checkyesno var
+#    Test $1 variable, and warn if not set to YES or NO.
+#    Return 0 if it's "yes" (et al), nonzero otherwise.
+#    to make default yes, do "checkyesno var yes"
+#
+checkyesno() {
+	local value=${!1}
+	# debug "checkyesno: $1 is set to $value."
+	if [[ -n $2 ]]; then
+		value=${value:-$2}
+	else
+		value=${value:-no}
+	fi
+	case $value in
+		#    "yes", "true", "on", or "1"
+		[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1)
+		return 0
+		;;
+		#    "no", "false", "off", or "0"
+		[Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0)
+		return 1
+		;;
+		*)
+		echo "\$${1} is not set properly." >&2
+		exit 1
+		;;
+	esac
+}
 
 # If X is already running and locktty=yes, activate it,
 # otherwise, increment.
-if [[ ${locktty} == "yes" ]]; then
+if $(checkyesno locktty); then
 	# Verify display exists
-	if [ -n "${display//[0-9]/}" ]; then
+	if [[ -n "${display//[0-9]/}" ]]; then
 		display=0
 	fi
 	# Activate existing X session
 	if xdpyinfo -display :${display}.0 &> /dev/null; then
-		let tty=${display}+${xtty}
+		let tty=display+xtty
 		chvt ${tty}
 		exit 0
 	fi
 else
 	# Get the first empty display
 	display=0
-	while [ ${display} -lt 7 ]; do
+	while [[ ${display} -lt 7 ]]; do
 		if xdpyinfo -display :${display}.0 &> /dev/null; then
-			let display=${display}+1
+			let display=display+1
 		else
 			break
 		fi
@@ -85,41 +134,40 @@ mainmenu() {
 	count=0
 	menu=$(
 		while [[ ${count} -lt ${#wmdisplist[@]} ]]; do
-			echo -ne "${count} ${wmdisplist[${count}]} "
+			echo -ne "$((count+countfrom)) ${wmdisplist[${count}]} "
 			let count=count+1
 		done
 	)
 
 	# Check if console access is allowed
-	if [[ ${allowconsole} == "yes" ]]; then
-		if [[ ${allowshutdown} != "yes" ]]; then
+	if $(checkyesno allowconsole); then
+		if $(checkyesno allowshutdown); then
 			let halt=99
 		fi
-		let console=${#wmdisplist[@]}
-		menu=$(echo -ne "${menu} ${console} Console ")
+		let console=${#wmdisplist[@]}+countfrom
+		menu="${menu} ${console} Console "
 	fi
 
 	# Check if shutdown access is allowed
-	if [[ ${allowshutdown} == "yes" ]]; then
-		if [[ ${allowconsole} != "yes" ]]; then
+	if $(checkyesno allowshutdown); then
+		if $(checkyesno allowconsole); then
 			let halt=${#wmdisplist[@]}
 		else
 			let halt=${#wmdisplist[@]}+1
 		fi
-		menu=$(echo -ne "${menu} ${halt} Shutdown ")
+		let halt=halt+countfrom
+		menu="${menu} ${halt} Shutdown "
 	fi
 	
-	echo "halt=${halt} console=${console} wm='${wm}'" > ~/cdm.tmp
-
 	# Override dialog display if only one option is available
-	if [[ ${allowconsole} != "yes" ]] && [[ ${allowshutdown} != "yes" ]] && [[ ${#wmdisplist[@]} == 1 ]]; then
-		wm=${wmbinlist[@]}
+	if ! $(checkyesno allowconsole) && ! $(checkyesno allowshutdown) && [[ ${#wmdisplist[@]} == 1 ]]; then
+		wm=$countfrom
 	else
 		# Display selection dialog
 		wm=$(
-			dialog --colors --backtitle "${name} v${ver}" --stdout \
-				--ok-label " Select " --cancel-label " Logout " \
-				--menu "Select Window Manager" 0 0 0 ${menu}
+			DIALOGRC="$DIALOGRC" dialog --colors --backtitle "${name} v${ver}" --stdout \
+			--ok-label " Select " --cancel-label " Logout " \
+			--menu "Select Window Manager" 0 0 0 ${menu}
 		)
 		if [[ $? != 0 ]]; then
 			clear
@@ -130,36 +178,40 @@ mainmenu() {
 	# Set wm_bin
 	clear
 	if [[ ${wm} -eq ${console} ]]; then
-		${SHELL}
-		exit 0
+		exec ${SHELL}
 	elif [[ ${wm} -eq ${halt} ]]; then
 		shutdownmenu
 	else
-		export wm_bin="${wmbinlist[${wm}]}"
+		let wm=wm-countfrom
+		wm_bin="${wmbinlist[${wm}]}"
 		xstart
 	fi
 }
 
 shutdownmenu() {
-	haltmenu="0 Shutdown 1 Reboot"
-
-	# Check if suspend is enabled
-	if [[ ${allowsuspend} == "yes" ]]; then
-		haltmenu=$(echo -n "${haltmenu} 2 Suspend ")
-	fi
+	count=$countfrom
+	haltmenu=$(
+		for opt in Shutdown Reboot Suspend; do
+			# Check if suspend is enabled
+			if [[ $opt != Suspend ]] || $(checkyesno allowsuspend); then
+				echo -ne "$count $opt "
+				let count=count+1
+			fi
+		done
+	)
 
 	# Display shutdown dialog
 	haltopt=$(
-		dialog --colors --backtitle "${name} v${ver}" --stdout \
+		DIALOGRC="$DIALOGRC" dialog --colors --backtitle "${name} v${ver}" --stdout \
 			--ok-label " Select " --cancel-label " Cancel " \
 			--menu "Shutdown" 0 0 0 ${haltmenu}
 	)
 	
 	if [[ $? == 0 ]]; then
 		clear
-		if [[ ${haltopt} -eq 0 ]]; then
+		if [[ ${haltopt} -eq $countfrom ]]; then
 			${shutdowncommand}
-		elif [[ ${haltopt} -eq 1 ]]; then
+		elif [[ ${haltopt} -eq $((countfrom+1)) ]]; then
 			${rebootcommand}
 		else
 			${suspendcommand}
@@ -171,17 +223,27 @@ shutdownmenu() {
 
 xstart() {
 	# Start X
-	if [ ${loginshell} == "yes" ]; then
-		if [ ${wm_bin} == "gnome-session" ]; then
-			exec ck-launch-session bash --login -c "startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null" &
+	if $(checkyesno usexinit); then
+		if [[ -f $userclientrc ]]; then
+			wm_bin="$userclientrc $wm_bin"
+		elif [[ -f $sysclientrc ]]; then
+			wm_bin="$sysclientrc $wm_bin"
+		fi
+	fi
+
+	serverargs=":${display} ${serverargs} vt$((xtty+display))"
+
+	if $(checkyesno loginshell); then
+		if [[ ${wm_bin} == "gnome-session" ]]; then
+			exec ck-launch-session bash --login -c "startx $wm_bin -- :${serverargs} &> /dev/null" &
 		else
-			exec bash --login -c "startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null" &
+			exec bash --login -c "startx $wm_bin -- :${serverargs} &> /dev/null" &
 		fi
 	else
-		if [ ${wm_bin} == "gnome-session" ]; then
-			exec ck-launch-session startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
+		if [[ ${wm_bin} == "gnome-session" ]]; then
+			exec ck-launch-session startx $wm_bin -- :${serverargs} &> /dev/null &
 		else
-			exec startx /usr/share/cdm/xinitrc -- :${display} &> /dev/null &
+			exec startx $wm_bin -- :${serverargs} &> /dev/null &
 		fi
 	fi
 }

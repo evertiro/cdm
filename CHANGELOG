@@ -1,26 +1,37 @@
-Version 0.1 (2009-11-09)
-	- Initial release
+Version 0.4 (2010-01-03)
+	- Fixed CHANGELOG to better match standards
+	- Added proper utilization of exec
+	- Added checkyesno function to better handle creative responses in cdmrc
+	- Removed defaultwm option (unused)
+	- Added 'countfrom' option to allow CDM menus to start at 1
+	- Added 'usexinit' option to allow usage of ~/.xinitrc
+	- Added 'serverargs' option to allow passing custom options to the X server
+	- Massive code cleanup
+	- Thanks to jpryor for all his help!
 
-Version 0.1b (2009-11-09)
-	- Minor feature addition
-	- No longer requires editing user files
+Version 0.3.3 (2009-11-26)
+	- Fixed issue with gnome-session handler
 
-Version 0.2 (2009-11-10)
-	- Added shutdown option
-	- Added ability to set login shell (fix for some foreign layouts)
+Version 0.3.2 (2009-11-21)
+	- Added suspend option
 
+Version 0.3.1 (2009-11-20)
+	- Added failsafe to startup script that overrides execution if
+	logged in as root
+	
 Version 0.3 (2009-11-18)
 	- Fixed X incrementing function (thanks Andrwe)
 	- Fixed an issue with allowshutdown off and allowconsole on
 	- Code cleanup (thanks Brisbin33)
 	- Fixed issue with profile.d execution order
-
-Version 0.3.1 (2009-11-20)
-	- Added failsafe to startup script that overrides execution if
-	  logged in as root
-
-Version 0.3.2 (2009-11-21)
-	- Added suspend option
-
-Version 0.3.3 (2009-11-26)
-	- Fixed issue with gnome-session handler
+	  
+Version 0.2 (2009-11-10)
+	- Added shutdown option
+	- Added ability to set login shell (fix for some foreign layouts)
+	
+Version 0.1b (2009-11-09)
+	- Minor feature addition
+	- No longer requires editing user files
+	
+Version 0.1 (2009-11-09)
+	- Initial release
