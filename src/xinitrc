@@ -1,6 +1,0 @@
-#!/bin/sh
-
-if [ ! -n "${wm_bin}" ]; then
-    wm_bin="${defaultwm}"
-fi
-exec "${wm_bin}"
