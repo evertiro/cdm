@@ -1,4 +1,4 @@
-if [[ -z "$DISPLAY" ]] && [[ $(tty) = /dev/tty1 ]]; then
+if [[ -z "$DISPLAY" ]]; then #&& [[ $(tty) = /dev/tty1 ]]; then
 	# Drop root to console
 	if [[ $EUID -eq 0 ]]; then
 		exec ${SHELL}
