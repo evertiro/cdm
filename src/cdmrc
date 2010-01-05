@@ -4,7 +4,7 @@
 
 # Set CDM theme and dialog options
 theme=cdm
-countfrom=0
+countfrom=1
 
 # List all WM binary names
 wmbinlist=(awesome openbox-session)
@@ -23,7 +23,7 @@ rebootcommand='sudo shutdown -r now'
 # Allow suspend?
 # Note that this option requires pm-utils
 # to be installed and properly configured.
-allowsuspend=yes
+allowsuspend=no
 suspendcommand='sudo pm-suspend'
 
 # Set configuration for specific users?
@@ -50,7 +50,7 @@ courtney() {
 	allowshutdown=no
 
 	# Set specific display for user
-	# (Not honored unless locktty=yes)
+	# (Not used unless locktty=yes)
 	# display=1
 }
 
@@ -61,7 +61,7 @@ courtney() {
 # Set default display
 display=0
 
-# Where should first X tty be spawned?
+# Where should first X tty be spawned
 xtty=7
 
 # Restrict tty? (By default, cdm increments X tty, this setting
@@ -72,11 +72,5 @@ locktty=no
 # Enable login shell (fixes issues with some keymaps, uses bash)
 loginshell=no
 
-# Use ~/.xinitrc when it exists, or /etc/X11/xinit/xinitrc when
-# it doesn't. If no, then we instead call the chosen window
-# manager directly.
-usexinit=no
-
-# Additional arguments to pass to X server; it will be called as:
-#	exec /usr/bin/X :$display $serverargs vt$((xtty+display))
+# Additional arguments to pass to X server
 serverargs="-nolisten tcp -dpi 96"

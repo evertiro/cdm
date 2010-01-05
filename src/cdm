@@ -8,6 +8,7 @@
 #			important X incrementation function
 #	brisbin33.......code cleanup
 #	tigrmesh........finding a critical issue with the gnome-session handler
+#	Profjim.........several incredibly useful patches
 #
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -25,17 +26,13 @@
 #       MA 02110-1301, USA.
 
 name="Console Display Manager"
-ver="0.4"
+ver="0.4.1"
 info="\e[1;34m==>\e[1;37m"
 error="\e[1;31m==>\e[1;37m"
 success="\e[1;32m==>\e[1;37m"
 reset="\e[0m"
 # Ignore SIGINT (^C) and SIGTSTP (^Z)
 trap "" 2 20
-userclientrc=$HOME/.xinitrc
-sysclientrc=/etc/X11/xinit/xinitrc
-# userserverrc=$HOME/.xserverrc
-# sysserverrc=/etc/X11/xinit/xserverrc
 
 # Source cdm configuration
 if [[ -f /etc/cdmrc ]]; then
@@ -64,7 +61,6 @@ if [[ ! -z ${theme} ]]; then
 		echo -e "${info} Theme file ${theme} is invalid, reverting to default theme.${reset}"
 	fi
 fi
-# Fall back on defaults if valid theme isn't found
 if [[ -z $DIALOGRC ]]; then
 	if [[ -f /usr/share/cdm/themes/default ]]; then
 		DIALOGRC=/usr/share/cdm/themes/default
@@ -73,14 +69,15 @@ if [[ -z $DIALOGRC ]]; then
 	fi
 fi
 
-# Based on FreeBSD's /etc/rc.subr
-#
+### Based on FreeBSD's /etc/rc.subr
+##
 # checkyesno var
 #    Test $1 variable, and warn if not set to YES or NO.
 #    Return 0 if it's "yes" (et al), nonzero otherwise.
 #    to make default yes, do "checkyesno var yes"
-#
-checkyesno() {
+
+checkyesno()
+{
 	local value=${!1}
 	# debug "checkyesno: $1 is set to $value."
 	if [[ -n $2 ]]; then
@@ -89,18 +86,18 @@ checkyesno() {
 		value=${value:-no}
 	fi
 	case $value in
-		#    "yes", "true", "on", or "1"
-		[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1)
-		return 0
-		;;
-		#    "no", "false", "off", or "0"
-		[Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0)
-		return 1
-		;;
-		*)
-		echo "\$${1} is not set properly." >&2
-		exit 1
-		;;
+	#    "yes", "true", "on", or "1"
+	[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1)
+	return 0
+	;;
+	#    "no", "false", "off", or "0"
+	[Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0)
+	return 1
+	;;
+	*)
+	echo "\$${1} is not set properly." >&2
+	exit 1
+	;;
 	esac
 }
 
@@ -165,7 +162,8 @@ mainmenu() {
 	else
 		# Display selection dialog
 		wm=$(
-			DIALOGRC="$DIALOGRC" dialog --colors --backtitle "${name} v${ver}" --stdout \
+			DIALOGRC="$DIALOGRC" dialog --colors \
+			--backtitle "${name} v${ver}" --stdout \
 			--ok-label " Select " --cancel-label " Logout " \
 			--menu "Select Window Manager" 0 0 0 ${menu}
 		)
@@ -202,9 +200,10 @@ shutdownmenu() {
 
 	# Display shutdown dialog
 	haltopt=$(
-		DIALOGRC="$DIALOGRC" dialog --colors --backtitle "${name} v${ver}" --stdout \
-			--ok-label " Select " --cancel-label " Cancel " \
-			--menu "Shutdown" 0 0 0 ${haltmenu}
+		DIALOGRC="$DIALOGRC" dialog --colors \
+		--backtitle "${name} v${ver}" --stdout \
+		--ok-label " Select " --cancel-label " Cancel " \
+		--menu "Shutdown" 0 0 0 ${haltmenu}
 	)
 	
 	if [[ $? == 0 ]]; then
@@ -223,27 +222,19 @@ shutdownmenu() {
 
 xstart() {
 	# Start X
-	if $(checkyesno usexinit); then
-		if [[ -f $userclientrc ]]; then
-			wm_bin="$userclientrc $wm_bin"
-		elif [[ -f $sysclientrc ]]; then
-			wm_bin="$sysclientrc $wm_bin"
-		fi
-	fi
-
 	serverargs=":${display} ${serverargs} vt$((xtty+display))"
 
 	if $(checkyesno loginshell); then
 		if [[ ${wm_bin} == "gnome-session" ]]; then
-			exec ck-launch-session bash --login -c "startx $wm_bin -- ${serverargs} &> /dev/null" &
+			exec ck-launch-session bash --login -c "startx /usr/share/cdm/xinirc "$wm_bin" -- ${serverargs} &> /dev/null" &
 		else
-			exec bash --login -c "startx $wm_bin -- ${serverargs} &> /dev/null" &
+			exec bash --login -c "startx /usr/share/cdm/xinitrc "$wm_bin" -- ${serverargs} &> /dev/null" &
 		fi
 	else
 		if [[ ${wm_bin} == "gnome-session" ]]; then
-			exec ck-launch-session startx $wm_bin -- ${serverargs} &> /dev/null &
+			exec ck-launch-session startx /usr/share/cdm/xinitrc $wm_bin -- ${serverargs} &> /dev/null &
 		else
-			exec startx $wm_bin -- ${serverargs} &> /dev/null &
+			exec startx /usr/share/cdm/xinitrc $wm_bin -- ${serverargs} &> /dev/null &
 		fi
 	fi
 }
