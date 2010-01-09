@@ -33,6 +33,10 @@ success="\e[1;32m==>\e[1;37m"
 reset="\e[0m"
 # Ignore SIGINT (^C) and SIGTSTP (^Z)
 trap "" 2 20
+userclientrc=$HOME/.xinitrc
+sysclientrc=/etc/X11/xinit/xinitrc
+# userserverrc=$HOME/.xserverrc
+# sysserverrc=/etc/X11/xinit/xserverrc
 
 # Source cdm configuration
 if [[ -f /etc/cdmrc ]]; then
@@ -69,15 +73,14 @@ if [[ -z $DIALOGRC ]]; then
 	fi
 fi
 
-### Based on FreeBSD's /etc/rc.subr
-##
+# Based on FreeBSD's /etc/rc.subr
+#
 # checkyesno var
 #    Test $1 variable, and warn if not set to YES or NO.
 #    Return 0 if it's "yes" (et al), nonzero otherwise.
 #    to make default yes, do "checkyesno var yes"
 
-checkyesno()
-{
+checkyesno() {
 	local value=${!1}
 	# debug "checkyesno: $1 is set to $value."
 	if [[ -n $2 ]]; then
@@ -118,7 +121,10 @@ else
 	# Get the first empty display
 	display=0
 	while [[ ${display} -lt 7 ]]; do
-		if xdpyinfo -display :${display}.0 &> /dev/null; then
+		if info=$(xdpyinfo -display :${display}.0 2>&1 1>/dev/null); then
+			let display=display+1
+		elif [[ $info = No\ protocol\ specified* ]]; then
+			# Display is in use by another user
 			let display=display+1
 		else
 			break
@@ -222,20 +228,33 @@ shutdownmenu() {
 
 xstart() {
 	# Start X
+	if $(checkyesno usexinit); then
+		if [[ -f $userclientrc ]]; then
+			wm_bin="$userclientrc $wm_bin"
+		elif [[ -f $sysclientrc ]]; then
+			wm_bin="$sysclientrc $wm_bin"
+		fi
+	else
+		wm_bin="/usr/share/cdm/xinitrc $wm_bin"
+	fi
+
 	serverargs=":${display} ${serverargs} vt$((xtty+display))"
 
 	if $(checkyesno loginshell); then
-		if [[ ${wm_bin} == "gnome-session" ]]; then
-			exec ck-launch-session bash --login -c "startx /usr/share/cdm/xinirc "$wm_bin" -- ${serverargs} &> /dev/null" &
-		else
-			exec bash --login -c "startx /usr/share/cdm/xinitrc "$wm_bin" -- ${serverargs} &> /dev/null" &
-		fi
+	#	if [[ ${wm_bin} == "gnome-session" ]]; then
+			nohup ck-launch-session bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
+	#	else
+	#		nohup bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
+	#	fi
 	else
-		if [[ ${wm_bin} == "gnome-session" ]]; then
-			exec ck-launch-session startx /usr/share/cdm/xinitrc $wm_bin -- ${serverargs} &> /dev/null &
-		else
-			exec startx /usr/share/cdm/xinitrc $wm_bin -- ${serverargs} &> /dev/null &
-		fi
+	#	if [[ ${wm_bin} == "gnome-session" ]]; then
+			nohup ck-launch-session startx $wm_bin -- ${serverargs} &> /dev/null &
+	#	else
+	#		nohup startx $wm_bin -- ${serverargs} &> /dev/null &
+	#	fi
 	fi
+	# There's some kind of race condition:
+	# despite the nohup, if we exit too quickly the session is killed.
+	sleep 2
 }
 mainmenu

@@ -7,10 +7,10 @@ theme=cdm
 countfrom=1
 
 # List all WM binary names
-wmbinlist=(awesome openbox-session)
+wmbinlist=(awesome)
 
 # List all WM display names
-wmdisplist=(Awesome Openbox)
+wmdisplist=(Awesome)
 
 # Allow console login?
 allowconsole=yes
@@ -50,7 +50,7 @@ courtney() {
 	allowshutdown=no
 
 	# Set specific display for user
-	# (Not used unless locktty=yes)
+	# (Not honored unless locktty=yes)
 	# display=1
 }
 
@@ -61,7 +61,7 @@ courtney() {
 # Set default display
 display=0
 
-# Where should first X tty be spawned
+# Where should first X tty be spawned?
 xtty=7
 
 # Restrict tty? (By default, cdm increments X tty, this setting
@@ -69,8 +69,23 @@ xtty=7
 # setting the display=N option on a per-user basis.)
 locktty=no
 
-# Enable login shell (fixes issues with some keymaps, uses bash)
+# Enable login shell (fixes issues with some keymaps, uses bash).
+# Note that your bash scripts won't have any terminal as stdin when
+# started in this way. This may break some commands, including stty,
+# unless you explicitly check for [ -t 0 ] or that every login shell
+# is also interactive. However, we're sending stdout and stderr to
+# /dev/null, so you won't see the complaints.
 loginshell=no
 
-# Additional arguments to pass to X server
+# When usexinit=yes, we use ~/.xinitrc when it exists or
+# /etc/X11/xinit/xinitrc when it doesn't. These are passed the
+# chosen window manager as $1; note that the stock xinitrc
+# ignores this and always starts twm and three xterms. Your
+# custom xinitrc should start the window manager supplied as
+# $1 instead. If usexinit=no, then we instead call the chosen
+# window manager directly.
+usexinit=no
+
+# Additional arguments to pass to X server; it will be called as:
+#	exec /usr/bin/X :$display $serverargs vt$((xtty+display))
 serverargs="-nolisten tcp -dpi 96"
