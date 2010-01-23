@@ -7,10 +7,13 @@ theme=cdm
 countfrom=1
 
 # List all WM binary names
-wmbinlist=(awesome)
+wmbinlist=(awesome openbox-session)
 
 # List all WM display names
-wmdisplist=(Awesome)
+wmdisplist=(Awesome Openbox)
+
+# List programs to start at runtime
+runtime=('numlockx')
 
 # Allow console login?
 allowconsole=yes
@@ -77,13 +80,13 @@ locktty=no
 # /dev/null, so you won't see the complaints.
 loginshell=no
 
-# When usexinit=yes, we use ~/.xinitrc when it exists or
-# /etc/X11/xinit/xinitrc when it doesn't. These are passed the
-# chosen window manager as $1; note that the stock xinitrc
-# ignores this and always starts twm and three xterms. Your
-# custom xinitrc should start the window manager supplied as
-# $1 instead. If usexinit=no, then we instead call the chosen
-# window manager directly.
+# Additional arguments to pass to X server
+# When usexinit=yes, we use ~/.xinitrc when it exists or /etc/X11/xinit/xinitrc
+# when it doesn't. These are passed the chosen window manager as $1; note that
+# the stock /etc/X11/xinit/xinitrc ignores this and always starts twm and three
+# xterms. Your custom xinitrc should start the window manager supplied as $1
+# instead. There is a sample xinitrc included at /usr/share/cdm/xinitrc.skel.
+# If usexinit=no, then we instead call the chosen window manager directly.
 usexinit=no
 
 # Additional arguments to pass to X server; it will be called as:

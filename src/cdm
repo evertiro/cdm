@@ -26,7 +26,7 @@
 #       MA 02110-1301, USA.
 
 name="Console Display Manager"
-ver="0.4.1"
+ver="0.5"
 info="\e[1;34m==>\e[1;37m"
 error="\e[1;31m==>\e[1;37m"
 success="\e[1;32m==>\e[1;37m"
