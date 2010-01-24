@@ -182,6 +182,8 @@ mainmenu() {
 	# Set wm_bin
 	clear
 	if [[ ${wm} -eq ${console} ]]; then
+		#Fix SHLVL
+		export SHLVL=$((SHLVL-1))
 		exec ${SHELL}
 	elif [[ ${wm} -eq ${halt} ]]; then
 		shutdownmenu
