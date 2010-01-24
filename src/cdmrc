@@ -12,9 +12,6 @@ wmbinlist=(awesome openbox-session)
 # List all WM display names
 wmdisplist=(Awesome Openbox)
 
-# List programs to start at runtime
-runtime=('numlockx')
-
 # Allow console login?
 allowconsole=yes
 
