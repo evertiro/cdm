@@ -77,6 +77,11 @@ locktty=no
 # /dev/null, so you won't see the complaints.
 loginshell=no
 
+# The use of consolekit has recently become manditory with hal. However,
+# some users might prefer not using either one. If you don't want to
+# use consolekit, set the following variable to "no".
+consolekit=yes
+
 # Additional arguments to pass to X server
 # When usexinit=yes, we use ~/.xinitrc when it exists or /etc/X11/xinit/xinitrc
 # when it doesn't. These are passed the chosen window manager as $1; note that

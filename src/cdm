@@ -241,17 +241,17 @@ xstart() {
 	serverargs=":${display} ${serverargs} vt$((xtty+display))"
 
 	if $(checkyesno loginshell); then
-	#	if [[ ${wm_bin} == "gnome-session" ]]; then
+		if $(checkyesno consolekit); then
 			nohup ck-launch-session bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
-	#	else
-	#		nohup bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
-	#	fi
+		else
+			nohup bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
+		fi
 	else
-	#	if [[ ${wm_bin} == "gnome-session" ]]; then
+		if $(checkyesno consolekit); then
 			nohup ck-launch-session startx $wm_bin -- ${serverargs} &> /dev/null &
-	#	else
-	#		nohup startx $wm_bin -- ${serverargs} &> /dev/null &
-	#	fi
+		else
+			nohup startx $wm_bin -- ${serverargs} &> /dev/null &
+		fi
 	fi
 	# There's some kind of race condition:
 	# despite the nohup, if we exit too quickly the session is killed.
