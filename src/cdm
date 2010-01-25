@@ -255,8 +255,5 @@ xstart() {
 			nohup startx $wm_bin -- ${serverargs} &> /dev/null &
 		fi
 	fi
-	# There's some kind of race condition:
-	# despite the nohup, if we exit too quickly the session is killed.
-	sleep 2
 }
 mainmenu
