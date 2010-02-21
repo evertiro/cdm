@@ -137,10 +137,10 @@ mainmenu() {
 	count=0
 	menu=$(
 		while [[ ${count} -lt ${#wmdisplist[@]} ]]; do
-			if ! $(checkyesno consolefirst); then
-				echo -ne "$((count+countfrom)) ${wmdisplist[${count}]} "
-			else
+			if $(checkyesno allowconsole) && $(checkyesno consolefirst); then
 				echo -ne "$((count+countfrom+1)) ${wmdisplist[${count}]} "
+			else
+				echo -ne "$((count+countfrom)) ${wmdisplist[${count}]} "
 			fi
 			let count=count+1
 		done
