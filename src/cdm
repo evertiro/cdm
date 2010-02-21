@@ -137,7 +137,11 @@ mainmenu() {
 	count=0
 	menu=$(
 		while [[ ${count} -lt ${#wmdisplist[@]} ]]; do
-			echo -ne "$((count+countfrom)) ${wmdisplist[${count}]} "
+			if ! $(checkyesno consolefirst); then
+				echo -ne "$((count+countfrom)) ${wmdisplist[${count}]} "
+			else
+				echo -ne "$((count+countfrom+1)) ${wmdisplist[${count}]} "
+			fi
 			let count=count+1
 		done
 	)
@@ -147,8 +151,13 @@ mainmenu() {
 		if ! $(checkyesno allowshutdown); then
 			let halt=99
 		fi
-		let console=${#wmdisplist[@]}+countfrom
-		menu="${menu} ${console} Console "
+		if ! $(checkyesno consolefirst); then
+			let console=${#wmdisplist[@]}+countfrom
+			menu="${menu} ${console} Console "
+		else
+			let console=countfrom
+			menu="${console} Console ${menu} "
+		fi
 	fi
 
 	# Check if shutdown access is allowed
