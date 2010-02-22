@@ -197,7 +197,11 @@ mainmenu() {
 	elif [[ ${wm} -eq ${halt} ]]; then
 		shutdownmenu
 	else
-		let wm=wm-countfrom
+		if $(checkyesno consolefirst); then
+			let wm=wm-countfrom-1
+		else
+			let wm=wm-countfrom
+		fi
 		wm_bin="${wmbinlist[${wm}]}"
 		xstart
 	fi
