@@ -197,7 +197,7 @@ mainmenu() {
 	elif [[ ${wm} -eq ${halt} ]]; then
 		shutdownmenu
 	else
-		if $(checkyesno consolefirst); then
+		if $(checkyesno consolefirst) && $(checkyesno allowconsole); then
 			let wm=wm-countfrom-1
 		else
 			let wm=wm-countfrom
