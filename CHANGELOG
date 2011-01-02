@@ -1,3 +1,17 @@
+Version 0.5.3 (2011-01-02)
+        - Fixed issues with console login
+        - Added support for hibernation
+        - Updated to better support consolekit 4.2
+        - Thanks to lambchops468 for his help
+
+Version 0.5.2 (2010-01-24)
+	- Fixed race condition
+	- Fixed SHLVL incrementation
+
+Version 0.5.1 (2010-01-23)
+	- Removed leftover code
+	- Added option to disable consolekit
+
 Version 0.5 (2010-01-23)
 	- Changed the way the xstart function works
 	- Hopefully stabilized the xinitrc support

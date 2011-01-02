@@ -2,13 +2,14 @@
 #
 #   CDM: The Console Display Manager
 #
-#   Copyright (C) 2009, Daniel J Griffiths <ghost1227@archlinux.us>
+#   Copyright (C) 2009-2011, Daniel J Griffiths <ghost1227@archlinux.us>
 #   Thanks to:
 #	Andrwe..........beta-testing and submitting the fix for the all 
 #			important X incrementation function
 #	brisbin33.......code cleanup
 #	tigrmesh........finding a critical issue with the gnome-session handler
 #	Profjim.........several incredibly useful patches
+#       lambchops468....consolekit and hibernation patches
 #
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -26,7 +27,7 @@
 #       MA 02110-1301, USA.
 
 name="Console Display Manager"
-ver="0.5.1"
+ver="0.5.3"
 info="\e[1;34m==>\e[1;37m"
 error="\e[1;31m==>\e[1;37m"
 success="\e[1;32m==>\e[1;37m"
@@ -49,6 +50,7 @@ if [[ -f /etc/cdmrc ]]; then
 		let count=count+1
 	done
 	countfrom=${countfrom:-0}
+	consolekittime=${consolekittime:-30}
 else
 	echo -e "${error} ERROR: A valid cdm configuration was not found!${reset}"
 	echo -e "${info} Logging out.${reset}"
@@ -121,9 +123,9 @@ else
 	# Get the first empty display
 	display=0
 	while [[ ${display} -lt 7 ]]; do
-		if info=$(xdpyinfo -display :${display}.0 2>&1 1>/dev/null); then
+		if dpyinfo=$(xdpyinfo -display :${display}.0 2>&1 1>/dev/null); then
 			let display=display+1
-		elif [[ $info = No\ protocol\ specified* ]]; then
+		elif [[ $dpyinfo = No\ protocol\ specified* ]]; then
 			# Display is in use by another user
 			let display=display+1
 		else
@@ -137,11 +139,7 @@ mainmenu() {
 	count=0
 	menu=$(
 		while [[ ${count} -lt ${#wmdisplist[@]} ]]; do
-			if $(checkyesno allowconsole) && $(checkyesno consolefirst); then
-				echo -ne "$((count+countfrom+1)) ${wmdisplist[${count}]} "
-			else
-				echo -ne "$((count+countfrom)) ${wmdisplist[${count}]} "
-			fi
+			echo -ne "$((count+countfrom)) ${wmdisplist[${count}]} "
 			let count=count+1
 		done
 	)
@@ -151,13 +149,8 @@ mainmenu() {
 		if ! $(checkyesno allowshutdown); then
 			let halt=99
 		fi
-		if ! $(checkyesno consolefirst); then
-			let console=${#wmdisplist[@]}+countfrom
-			menu="${menu} ${console} Console "
-		else
-			let console=countfrom
-			menu="${console} Console ${menu} "
-		fi
+		let console=${#wmdisplist[@]}+countfrom
+		menu="${menu} ${console} Console "
 	fi
 
 	# Check if shutdown access is allowed
@@ -191,17 +184,11 @@ mainmenu() {
 	# Set wm_bin
 	clear
 	if [[ ${wm} -eq ${console} ]]; then
-		#Fix SHLVL
-		export SHLVL=$((SHLVL-1))
-		exec ${SHELL}
+		exit 2 #2 signals to the profile file to not exit.
 	elif [[ ${wm} -eq ${halt} ]]; then
 		shutdownmenu
 	else
-		if $(checkyesno consolefirst) && $(checkyesno allowconsole); then
-			let wm=wm-countfrom-1
-		else
-			let wm=wm-countfrom
-		fi
+		let wm=wm-countfrom
 		wm_bin="${wmbinlist[${wm}]}"
 		xstart
 	fi
@@ -210,9 +197,11 @@ mainmenu() {
 shutdownmenu() {
 	count=$countfrom
 	haltmenu=$(
-		for opt in Shutdown Reboot Suspend; do
-			# Check if suspend is enabled
-			if [[ $opt != Suspend ]] || $(checkyesno allowsuspend); then
+		for opt in Shutdown Reboot Suspend Hibernate; do
+			# Check if suspend/hibernate is enabled
+			if ([[ $opt != Suspend ]] && [[ $opt != Hibernate ]]) ||
+				([[ $opt == Suspend ]] && $(checkyesno allowsuspend)) ||
+				([[ $opt == Hibernate ]] && $(checkyesno allowhibernate)); then
 				echo -ne "$count $opt "
 				let count=count+1
 			fi
@@ -233,8 +222,10 @@ shutdownmenu() {
 			${shutdowncommand}
 		elif [[ ${haltopt} -eq $((countfrom+1)) ]]; then
 			${rebootcommand}
-		else
+		elif [[ ${haltopt} -eq $((countfrom+2)) ]] && $(checkyesno allowsuspend); then
 			${suspendcommand}
+		else
+			${hibernatecommand}
 		fi
 	else
 		mainmenu
@@ -255,18 +246,48 @@ xstart() {
 
 	serverargs=":${display} ${serverargs} vt$((xtty+display))"
 
+	if $(checkyesno consolekit); then #do first to avoid race conditions
+		echo -ne "${info} Waiting for ConsoleKit to register X session (timeout ${consolekittime}s)..."
+
+		sleep $consolekittime &
+		clockpid=$!
+	
+		trap "echo -e \"Registered! ${reset}\"" USR1
+	
+		#have to store pid of dbus-monitor this way since dbus-monitor will run until killed.
+		fifo=$(mktemp --dry-run)
+		mkfifo --mode=700 $fifo
+		(dbus-monitor --system type=signal,interface=org.freedesktop.ConsoleKit.Seat,member=SessionAdded & echo $! > $fifo ) | \
+		 sed -un 's|[[:space:]]*object path \"\(/[a-zA-Z0-9/]*\)\"|\1|p' | while read object; do
+			if dbus-send --system --print-reply  --dest=org.freedesktop.ConsoleKit "$object" org.freedesktop.ConsoleKit.Session.GetX11Display | \
+		       	  grep -qF "$display"; then
+				kill -USR1 $$
+				break
+			fi
+		 done &
+
+		 read dbuspid < $fifo
+		 rm -f $fifo
+	fi
+
 	if $(checkyesno loginshell); then
-		if $(checkyesno consolekit); then
-			nohup ck-launch-session bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
-		else
-			nohup bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
-		fi
+		nohup bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
 	else
-		if $(checkyesno consolekit); then
-			nohup ck-launch-session startx $wm_bin -- ${serverargs} &> /dev/null &
+		nohup startx $wm_bin -- ${serverargs} &> /dev/null &
+	fi
+
+	if [[ -n $clockpid ]]; then
+		#if wait returns with a value >128, it was interrupted by the trap, so registration was sucessful.
+		if wait $clockpid; then
+			echo -e "Timed out, giving up.\nCheck to see if you are wrapping your session with ck-launch-session or increase the timeout. ${reset}"
+			kill $dbuspid
+			exit 1
 		else
-			nohup startx $wm_bin -- ${serverargs} &> /dev/null &
+			kill $dbuspid $clockpid
+			exit 0
 		fi
 	fi
+
+	exit 0
 }
 mainmenu

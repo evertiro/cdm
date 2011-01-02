@@ -14,7 +14,6 @@ wmdisplist=(Awesome Openbox)
 
 # Allow console login?
 allowconsole=yes
-consolefirst=no
 
 # Allow shutdown?
 allowshutdown=yes
@@ -26,6 +25,8 @@ rebootcommand='sudo shutdown -r now'
 # to be installed and properly configured.
 allowsuspend=no
 suspendcommand='sudo pm-suspend'
+allowhibernate=no
+hibernatecommand='sudo pm-hibernate'
 
 # Set configuration for specific users?
 userconfig=(courtney)
@@ -82,6 +83,9 @@ loginshell=no
 # some users might prefer not using either one. If you don't want to
 # use consolekit, set the following variable to "no".
 consolekit=yes
+
+# Timeout for waiting for X session to register with consoleKit
+consolekittime=30
 
 # Additional arguments to pass to X server
 # When usexinit=yes, we use ~/.xinitrc when it exists or /etc/X11/xinit/xinitrc
