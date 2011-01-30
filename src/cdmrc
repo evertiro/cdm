@@ -98,4 +98,4 @@ usexinit=no
 
 # Additional arguments to pass to X server; it will be called as:
 #	exec /usr/bin/X :$display $serverargs vt$((xtty+display))
-serverargs="-nolisten tcp -dpi 96"
+serverargs="-nolisten tcp"
