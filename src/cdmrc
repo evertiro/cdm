@@ -7,10 +7,12 @@ theme=cdm
 countfrom=1
 
 # List all WM binary names
-wmbinlist=(awesome openbox-session)
+# If this is not set all sessions in
+# /etc/X11/Sessions are offered as choices.
+wmbinlist=()
 
 # List all WM display names
-wmdisplist=(Awesome Openbox)
+wmdisplist=()
 
 # Allow console login?
 allowconsole=yes

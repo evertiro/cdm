@@ -58,6 +58,14 @@ else
 	exit 1
 fi
 
+# Offer all available sessions in /etc/X11/Sessions
+# if wmbinlist if not explicitly set in cdmrc
+
+if [[ "${#wmbinlist[@]}" -eq 0 ]]; then
+    wmbinlist=($(ls /etc/X11/Sessions))
+    wmdisplist=($(echo ${wmbinlist[@]^}))
+fi
+
 unset DIALOGRC
 # Source theme file
 if [[ ! -z ${theme} ]]; then
