@@ -249,7 +249,7 @@ xstart() {
 			wm_bin="$sysclientrc $wm_bin"
 		fi
 	else
-		wm_bin="/usr/share/cdm/xinitrc $wm_bin"
+		wm_bin="/etc/X11/cdm/xinitrc $wm_bin"
 	fi
 
 	serverargs=":${display} ${serverargs} vt$((xtty+display))"
