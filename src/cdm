@@ -40,8 +40,8 @@ sysclientrc=/etc/X11/xinit/xinitrc
 # sysserverrc=/etc/X11/xinit/xserverrc
 
 # Source cdm configuration
-if [[ -f /etc/cdmrc ]]; then
-	source /etc/cdmrc
+if [[ -f /etc/X11/cdm/cdmrc ]]; then
+	source /etc/X11/cdm/cdmrc
 	count=0
 	while [[ ${count} -lt ${#userconfig[@]} ]]; do
 		if [[ "$USER" == "${userconfig[${count}]}" ]]; then
