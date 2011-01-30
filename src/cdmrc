@@ -16,7 +16,9 @@ wmdisplist=(Awesome Openbox)
 allowconsole=yes
 
 # Allow shutdown?
-allowshutdown=yes
+# Note that this option requires sudo
+# to be installed and properly configured.
+allowshutdown=no
 shutdowncommand='sudo shutdown -h now'
 rebootcommand='sudo shutdown -r now'
 
