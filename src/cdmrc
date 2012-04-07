@@ -32,34 +32,6 @@ suspendcommand='sudo pm-suspend'
 allowhibernate=no
 hibernatecommand='sudo pm-hibernate'
 
-# Set configuration for specific users?
-userconfig=(courtney)
-
-##########################
-### USER CONFIGURATION ###
-##########################
-
-courtney() {
-	# Set CDM theme
-	theme=lime
-
-	# List user allowed WM binary names
-	wmbinlist=(openbox-session)
-
-	# List user allowed WM display names
-	wmdisplist=(Openbox)
-
-	# Allow console login?
-	allowconsole=yes
-
-	# Allow shutdown?
-	allowshutdown=no
-
-	# Set specific display for user
-	# (Not honored unless locktty=yes)
-	# display=1
-}
-
 ############################
 ### SYSTEM CONFIGURATION ###
 ############################

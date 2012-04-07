@@ -39,23 +39,14 @@ sysclientrc=/etc/X11/xinit/xinitrc
 # userserverrc=$HOME/.xserverrc
 # sysserverrc=/etc/X11/xinit/xserverrc
 
-# Source cdm configuration
-if [[ -f /etc/X11/cdm/cdmrc ]]; then
-	source /etc/X11/cdm/cdmrc
-	count=0
-	while [[ ${count} -lt ${#userconfig[@]} ]]; do
-		if [[ "$USER" == "${userconfig[${count}]}" ]]; then
-			${userconfig[${count}]}
-		fi
-		let count=count+1
-	done
-	countfrom=${countfrom:-0}
-	cktimeout=${cktimeout:-30}
-else
-	eerror "A valid cdm configuration was not found!"
-	ewarn "Logging out."
-	sleep 3
-	exit 1
+# Source cdm configurations.
+
+if [[ -n "$1" ]]; then
+	source "$1"
+elif [[ -f "$HOME/.cdmrc" ]]; then
+	source "$HOME/.cdmrc"
+elif [[ -f /etc/cdmrc ]]; then
+	source /etc/cdmrc
 fi
 
 # Offer all available sessions in /etc/X11/Sessions
