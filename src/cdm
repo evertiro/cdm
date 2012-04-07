@@ -197,43 +197,11 @@ xstart() {
 
 	serverargs=":${display} ${serverargs} vt$((xtty+display))"
 
-	if $(yesno consolekit); then #do first to avoid race conditions
-		ebegin "Waiting for ConsoleKit to register X session (timeout ${cktimeout}s)..."
-
-		sleep $cktimeout &
-		clockpid=$!
-
-		#have to store pid of dbus-monitor this way since dbus-monitor will run until killed.
-		fifo=$(mktemp --dry-run)
-		mkfifo --mode=700 $fifo
-		(dbus-monitor --system type=signal,interface=org.freedesktop.ConsoleKit.Seat,member=SessionAdded & echo $! > $fifo ) | \
-		 sed -un 's|[[:space:]]*object path \"\(/[a-zA-Z0-9/]*\)\"|\1|p' | while read object; do
-			if dbus-send --system --print-reply  --dest=org.freedesktop.ConsoleKit "$object" org.freedesktop.ConsoleKit.Session.GetX11Display | \
-		       	  grep -qF "$display"; then break
-			fi
-		 done &
-
-		 read dbuspid < $fifo
-		 rm -f $fifo
+	$(yesno consolekit) && launchflags="-c -t $cktimeout"
+	if ! eval cdm-xlaunch $launchflags -- $bin -- $serverargs; then
+		ewarn "\`cdm-xlaunch' exited unsuccessfully."
+		exit 1
 	fi
-
-	# Conform to POSIX and do not use `>&' here.
-	sh -i -c "(startx $wm_bin -- ${serverargs} > /dev/null 2>&1 &)"
-
-	if [[ -n $clockpid ]]; then
-		#if wait returns with a value >128, it was interrupted by the trap, so registration was sucessful.
-		if wait $clockpid; then
-			eend "Timed out, giving up.\nCheck to see if you are wrapping your session with ck-launch-session or increase the timeout."
-			kill $dbuspid
-			exit 1
-		else
-			eend 0
-			kill $dbuspid $clockpid
-			exit 0
-		fi
-	fi
-
-	exit 0
 }
 mainmenu
 
