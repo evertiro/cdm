@@ -1,70 +1,51 @@
-############################
-### GLOBAL CONFIGURATION ###
-############################
+#!/bin/bash
+#
+# Example config file for cdm(1).
+# Values set here is the default as in cdm(1).
 
-# Set CDM theme and dialog options
-dialogrc=/usr/share/cdm/themes/cdm
-countfrom=1
+# Style for the cdm dialog, which is printed with dialog(1).
+# Default to unset, causing dialog(1) to use the system wide default.
+# See /usr/share/cdm/themes for some nice choices.
+dialogrc=
 
-# List all WM binary names
-# If this is not set all sessions in
-# /etc/X11/Sessions are offered as choices.
-wmbinlist=()
+# Index of the first item in the menu.
+countfrom=0
 
-# List all WM display names
-wmdisplist=()
+# List of programs, commands with whitespaces should be quoted or escaped.
+# If unset, all sessions in /etc/X11/Sessions are offered as choices.
+#
+# (An example:)
+# binlist=("~/.xsession" "/bin/bash --login" "/usr/bin/fbterm")
 
-# Allow console login?
-allowconsole=yes
+# List all program display names, one-by-one matched with $binlist.
+# Names with whitespaces should be quoted or escaped.
+#
+# (Continued example:)
+# namelist=(XSession Console FBTerm)
 
-# Allow shutdown?
-# Note that this option requires sudo
-# to be installed and properly configured.
-allowshutdown=no
-shutdowncommand='sudo shutdown -h now'
-rebootcommand='sudo shutdown -r now'
+# Type of the programs, one-by-one matched with $binlist.
+# `C' for *C*onsole programs, which would be `exec'ed.
+# `X' for *X* programs, which would be run with cdm-xlaunch(1).
+#
+# (Continued example:)
+# flaglist=(X C C)
 
-# Allow suspend?
-# Note that this option requires pm-utils
-# to be installed and properly configured.
-allowsuspend=no
-suspendcommand='sudo pm-suspend'
-allowhibernate=no
-hibernatecommand='sudo pm-hibernate'
-
-############################
-### SYSTEM CONFIGURATION ###
-############################
-
-# Set default display
+# Set default display.
 display=0
 
 # Where should first X tty be spawned?
 xtty=7
 
-# Restrict tty? (By default, cdm increments X tty, this setting
-# allows administrators to lock users into one specific tty by
-# setting the display=N option on a per-user basis.)
-locktty=no
+# Should cdm(1) stick to the specified display?
+locktty=yes
 
-# The use of consolekit has recently become manditory with hal. However,
-# some users might prefer not using either one. If you don't want to
-# use consolekit, set the following variable to "no".
+# Use consolekit for X session?
 consolekit=yes
 
-# Timeout for waiting for X session to register with consoleKit
-cktimeout=30
-
-# Additional arguments to pass to X server
-# When usexinit=yes, we use ~/.xinitrc when it exists or /etc/X11/xinit/xinitrc
-# when it doesn't. These are passed the chosen window manager as $1; note that
-# the stock /etc/X11/xinit/xinitrc ignores this and always starts twm and three
-# xterms. Your custom xinitrc should start the window manager supplied as $1
-# instead. There is a sample xinitrc included at /usr/share/cdm/xinitrc.skel.
-# If usexinit=no, then we instead call the chosen window manager directly.
-usexinit=no
+# Timeout for waiting for X session to register with consolekit.
+cktimeout=5
 
 # Additional arguments to pass to X server; it will be called as:
-#	exec /usr/bin/X :$display $serverargs vt$((xtty+display))
-serverargs="-nolisten tcp"
+#   exec /usr/bin/X :$display $serverargs vt$((xtty+display))
+serverargs='-nolisten tcp'
 

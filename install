@@ -12,3 +12,4 @@ else
 	install -Dm755 zzz-cdm-profile.sh /etc/profile.d/zzz-cdm-profile.sh
 	cp -Rf themes /usr/share/cdm/
 fi
+
