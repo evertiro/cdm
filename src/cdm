@@ -57,34 +57,6 @@ if [[ "${#wmbinlist[@]}" -eq 0 ]]; then
     wmdisplist=($(echo ${wmbinlist[@]^}))
 fi
 
-# If X is already running and locktty=yes, activate it,
-# otherwise, increment.
-if $(yesno locktty); then
-	# Verify display exists
-	if [[ -n "${display//[0-9]/}" ]]; then
-		display=0
-	fi
-	# Activate existing X session
-	if xdpyinfo -display :${display}.0 &> /dev/null; then
-		let tty=display+xtty
-		chvt ${tty}
-		exit 0
-	fi
-else
-	# Get the first empty display
-	display=0
-	while [[ ${display} -lt 7 ]]; do
-		if dpyinfo=$(xdpyinfo -display :${display}.0 2>&1 1>/dev/null); then
-			let display=display+1
-		elif [[ $dpyinfo = No\ protocol\ specified* ]]; then
-			# Display is in use by another user
-			let display=display+1
-		else
-			break
-		fi
-	done
-fi
-
 mainmenu() {
 	# Generate main menu
 	count=0
@@ -184,6 +156,34 @@ shutdownmenu() {
 }
 
 xstart() {
+	# If X is already running and locktty=yes, activate it,
+	# otherwise, increment.
+	if $(yesno locktty); then
+		# Verify display exists
+		if [[ -n "${display//[0-9]/}" ]]; then
+			display=0
+		fi
+		# Activate existing X session
+		if xdpyinfo -display :${display}.0 &> /dev/null; then
+			let tty=display+xtty
+			chvt ${tty}
+			exit 0
+		fi
+	else
+		# Get the first empty display
+		display=0
+		while [[ ${display} -lt 7 ]]; do
+			if dpyinfo=$(xdpyinfo -display :${display}.0 2>&1 1>/dev/null); then
+				let display=display+1
+			elif [[ $dpyinfo = No\ protocol\ specified* ]]; then
+				# Display is in use by another user
+				let display=display+1
+			else
+				break
+			fi
+		done
+	fi
+
 	# Start X
 	if $(yesno usexinit); then
 		if [[ -f $userclientrc ]]; then
