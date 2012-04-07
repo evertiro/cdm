@@ -33,8 +33,8 @@ info="\e[1;34m==>\e[1;37m"
 error="\e[1;31m==>\e[1;37m"
 success="\e[1;32m==>\e[1;37m"
 reset="\e[0m"
-# Ignore SIGINT (^C) and SIGTSTP (^Z)
-trap "" 2 20
+
+trap '' SIGINT SIGTSTP
 
 dialogrc=${dialogrc:-}
 userclientrc=$HOME/.xinitrc
