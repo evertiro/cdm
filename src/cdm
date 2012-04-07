@@ -29,12 +29,9 @@
 
 name="Console Display Manager"
 ver="0.5.3"
-info="\e[1;34m==>\e[1;37m"
-error="\e[1;31m==>\e[1;37m"
-success="\e[1;32m==>\e[1;37m"
-reset="\e[0m"
 
 trap '' SIGINT SIGTSTP
+source /etc/init.d/functions.sh
 
 dialogrc=${dialogrc:-}
 userclientrc=$HOME/.xinitrc
@@ -55,8 +52,8 @@ if [[ -f /etc/X11/cdm/cdmrc ]]; then
 	countfrom=${countfrom:-0}
 	cktimeout=${cktimeout:-30}
 else
-	echo -e "${error} ERROR: A valid cdm configuration was not found!${reset}"
-	echo -e "${info} Logging out.${reset}"
+	eerror "A valid cdm configuration was not found!"
+	ewarn "Logging out."
 	sleep 3
 	exit 1
 fi
@@ -69,40 +66,9 @@ if [[ "${#wmbinlist[@]}" -eq 0 ]]; then
     wmdisplist=($(echo ${wmbinlist[@]^}))
 fi
 
-# Based on FreeBSD's /etc/rc.subr
-#
-# checkyesno var
-#    Test $1 variable, and warn if not set to YES or NO.
-#    Return 0 if it's "yes" (et al), nonzero otherwise.
-#    to make default yes, do "checkyesno var yes"
-
-checkyesno() {
-	local value=${!1}
-	# debug "checkyesno: $1 is set to $value."
-	if [[ -n $2 ]]; then
-		value=${value:-$2}
-	else
-		value=${value:-no}
-	fi
-	case $value in
-	#    "yes", "true", "on", or "1"
-	[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1)
-	return 0
-	;;
-	#    "no", "false", "off", or "0"
-	[Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0)
-	return 1
-	;;
-	*)
-	echo "\$${1} is not set properly." >&2
-	exit 1
-	;;
-	esac
-}
-
 # If X is already running and locktty=yes, activate it,
 # otherwise, increment.
-if $(checkyesno locktty); then
+if $(yesno locktty); then
 	# Verify display exists
 	if [[ -n "${display//[0-9]/}" ]]; then
 		display=0
@@ -139,8 +105,8 @@ mainmenu() {
 	)
 
 	# Check if console access is allowed
-	if $(checkyesno allowconsole); then
-		if ! $(checkyesno allowshutdown); then
+	if $(yesno allowconsole); then
+		if ! $(yesno allowshutdown); then
 			let halt=99
 		fi
 		let console=${#wmdisplist[@]}+countfrom
@@ -148,8 +114,8 @@ mainmenu() {
 	fi
 
 	# Check if shutdown access is allowed
-	if $(checkyesno allowshutdown); then
-		if ! $(checkyesno allowconsole); then
+	if $(yesno allowshutdown); then
+		if ! $(yesno allowconsole); then
 			let halt=${#wmdisplist[@]}
 		else
 			let halt=${#wmdisplist[@]}+1
@@ -159,7 +125,7 @@ mainmenu() {
 	fi
 
 	# Override dialog display if only one option is available
-	if ! $(checkyesno allowconsole) && ! $(checkyesno allowshutdown) && [[ ${#wmdisplist[@]} == 1 ]]; then
+	if ! $(yesno allowconsole) && ! $(yesno allowshutdown) && [[ ${#wmdisplist[@]} == 1 ]]; then
 		wm=$countfrom
 	else
 		# Display selection dialog
@@ -194,8 +160,8 @@ shutdownmenu() {
 		for opt in Shutdown Reboot Suspend Hibernate; do
 			# Check if suspend/hibernate is enabled
 			if ([[ $opt != Suspend ]] && [[ $opt != Hibernate ]]) ||
-				([[ $opt == Suspend ]] && $(checkyesno allowsuspend)) ||
-				([[ $opt == Hibernate ]] && $(checkyesno allowhibernate)); then
+				([[ $opt == Suspend ]] && $(yesno allowsuspend)) ||
+				([[ $opt == Hibernate ]] && $(yesno allowhibernate)); then
 				echo -ne "$count $opt "
 				let count=count+1
 			fi
@@ -216,7 +182,7 @@ shutdownmenu() {
 			${shutdowncommand}
 		elif [[ ${haltopt} -eq $((countfrom+1)) ]]; then
 			${rebootcommand}
-		elif [[ ${haltopt} -eq $((countfrom+2)) ]] && $(checkyesno allowsuspend); then
+		elif [[ ${haltopt} -eq $((countfrom+2)) ]] && $(yesno allowsuspend); then
 			${suspendcommand}
 		else
 			${hibernatecommand}
@@ -228,7 +194,7 @@ shutdownmenu() {
 
 xstart() {
 	# Start X
-	if $(checkyesno usexinit); then
+	if $(yesno usexinit); then
 		if [[ -f $userclientrc ]]; then
 			wm_bin="$userclientrc $wm_bin"
 		elif [[ -f $sysclientrc ]]; then
@@ -240,13 +206,11 @@ xstart() {
 
 	serverargs=":${display} ${serverargs} vt$((xtty+display))"
 
-	if $(checkyesno consolekit); then #do first to avoid race conditions
-		echo -ne "${info} Waiting for ConsoleKit to register X session (timeout ${cktimeout}s)..."
+	if $(yesno consolekit); then #do first to avoid race conditions
+		ebegin "Waiting for ConsoleKit to register X session (timeout ${cktimeout}s)..."
 
 		sleep $cktimeout &
 		clockpid=$!
-
-		trap "echo -e \"Registered! ${reset}\"" USR1
 
 		#have to store pid of dbus-monitor this way since dbus-monitor will run until killed.
 		fifo=$(mktemp --dry-run)
@@ -254,9 +218,7 @@ xstart() {
 		(dbus-monitor --system type=signal,interface=org.freedesktop.ConsoleKit.Seat,member=SessionAdded & echo $! > $fifo ) | \
 		 sed -un 's|[[:space:]]*object path \"\(/[a-zA-Z0-9/]*\)\"|\1|p' | while read object; do
 			if dbus-send --system --print-reply  --dest=org.freedesktop.ConsoleKit "$object" org.freedesktop.ConsoleKit.Session.GetX11Display | \
-		       	  grep -qF "$display"; then
-				kill -USR1 $$
-				break
+		       	  grep -qF "$display"; then break
 			fi
 		 done &
 
@@ -264,7 +226,7 @@ xstart() {
 		 rm -f $fifo
 	fi
 
-	if $(checkyesno loginshell); then
+	if $(yesno loginshell); then
 		nohup bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
 	else
 		nohup startx $wm_bin -- ${serverargs} &> /dev/null &
@@ -273,10 +235,11 @@ xstart() {
 	if [[ -n $clockpid ]]; then
 		#if wait returns with a value >128, it was interrupted by the trap, so registration was sucessful.
 		if wait $clockpid; then
-			echo -e "Timed out, giving up.\nCheck to see if you are wrapping your session with ck-launch-session or increase the timeout. ${reset}"
+			eend "Timed out, giving up.\nCheck to see if you are wrapping your session with ck-launch-session or increase the timeout."
 			kill $dbuspid
 			exit 1
 		else
+			eend 0
 			kill $dbuspid $clockpid
 			exit 0
 		fi
