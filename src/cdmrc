@@ -47,14 +47,6 @@ xtty=7
 # setting the display=N option on a per-user basis.)
 locktty=no
 
-# Enable login shell (fixes issues with some keymaps, uses bash).
-# Note that your bash scripts won't have any terminal as stdin when
-# started in this way. This may break some commands, including stty,
-# unless you explicitly check for [ -t 0 ] or that every login shell
-# is also interactive. However, we're sending stdout and stderr to
-# /dev/null, so you won't see the complaints.
-loginshell=no
-
 # The use of consolekit has recently become manditory with hal. However,
 # some users might prefer not using either one. If you don't want to
 # use consolekit, set the following variable to "no".
@@ -75,3 +67,4 @@ usexinit=no
 # Additional arguments to pass to X server; it will be called as:
 #	exec /usr/bin/X :$display $serverargs vt$((xtty+display))
 serverargs="-nolisten tcp"
+

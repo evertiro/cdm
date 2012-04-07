@@ -217,11 +217,8 @@ xstart() {
 		 rm -f $fifo
 	fi
 
-	if $(yesno loginshell); then
-		nohup bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
-	else
-		nohup startx $wm_bin -- ${serverargs} &> /dev/null &
-	fi
+	# Conform to POSIX and do not use `>&' here.
+	sh -i -c "(startx $wm_bin -- ${serverargs} > /dev/null 2>&1 &)"
 
 	if [[ -n $clockpid ]]; then
 		#if wait returns with a value >128, it was interrupted by the trap, so registration was sucessful.
