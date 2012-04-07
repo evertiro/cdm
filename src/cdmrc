@@ -3,7 +3,7 @@
 ############################
 
 # Set CDM theme and dialog options
-theme=cdm
+dialogrc=/usr/share/cdm/themes/cdm
 countfrom=1
 
 # List all WM binary names
@@ -89,7 +89,7 @@ loginshell=no
 consolekit=yes
 
 # Timeout for waiting for X session to register with consoleKit
-consolekittime=30
+cktimeout=30
 
 # Additional arguments to pass to X server
 # When usexinit=yes, we use ~/.xinitrc when it exists or /etc/X11/xinit/xinitrc

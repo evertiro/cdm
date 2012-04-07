@@ -35,6 +35,8 @@ success="\e[1;32m==>\e[1;37m"
 reset="\e[0m"
 # Ignore SIGINT (^C) and SIGTSTP (^Z)
 trap "" 2 20
+
+dialogrc=${dialogrc:-}
 userclientrc=$HOME/.xinitrc
 sysclientrc=/etc/X11/xinit/xinitrc
 # userserverrc=$HOME/.xserverrc
@@ -51,7 +53,7 @@ if [[ -f /etc/X11/cdm/cdmrc ]]; then
 		let count=count+1
 	done
 	countfrom=${countfrom:-0}
-	consolekittime=${consolekittime:-30}
+	cktimeout=${cktimeout:-30}
 else
 	echo -e "${error} ERROR: A valid cdm configuration was not found!${reset}"
 	echo -e "${info} Logging out.${reset}"
@@ -65,23 +67,6 @@ fi
 if [[ "${#wmbinlist[@]}" -eq 0 ]]; then
     wmbinlist=($(ls /etc/X11/Sessions))
     wmdisplist=($(echo ${wmbinlist[@]^}))
-fi
-
-unset DIALOGRC
-# Source theme file
-if [[ ! -z ${theme} ]]; then
-	if [[ -f /usr/share/cdm/themes/${theme} ]]; then
-		DIALOGRC=/usr/share/cdm/themes/${theme}
-	else
-		echo -e "${info} Theme file ${theme} is invalid, reverting to default theme.${reset}"
-	fi
-fi
-if [[ -z $DIALOGRC ]]; then
-	if [[ -f /usr/share/cdm/themes/default ]]; then
-		DIALOGRC=/usr/share/cdm/themes/default
-	else
-		echo -e "${info} A valid theme file was not found, using system defaults.${reset}"
-	fi
 fi
 
 # Based on FreeBSD's /etc/rc.subr
@@ -172,14 +157,14 @@ mainmenu() {
 		let halt=halt+countfrom
 		menu="${menu} ${halt} Shutdown "
 	fi
-	
+
 	# Override dialog display if only one option is available
 	if ! $(checkyesno allowconsole) && ! $(checkyesno allowshutdown) && [[ ${#wmdisplist[@]} == 1 ]]; then
 		wm=$countfrom
 	else
 		# Display selection dialog
 		wm=$(
-			DIALOGRC="$DIALOGRC" dialog --colors \
+			DIALOGRC="$dialogrc" dialog --colors \
 			--backtitle "${name} v${ver}" --stdout \
 			--ok-label " Select " --cancel-label " Logout " \
 			--menu "Select Window Manager" 0 0 0 ${menu}
@@ -219,12 +204,12 @@ shutdownmenu() {
 
 	# Display shutdown dialog
 	haltopt=$(
-		DIALOGRC="$DIALOGRC" dialog --colors \
+		DIALOGRC="$dialogrc" dialog --colors \
 		--backtitle "${name} v${ver}" --stdout \
 		--ok-label " Select " --cancel-label " Cancel " \
 		--menu "Shutdown" 0 0 0 ${haltmenu}
 	)
-	
+
 	if [[ $? == 0 ]]; then
 		clear
 		if [[ ${haltopt} -eq $countfrom ]]; then
@@ -256,13 +241,13 @@ xstart() {
 	serverargs=":${display} ${serverargs} vt$((xtty+display))"
 
 	if $(checkyesno consolekit); then #do first to avoid race conditions
-		echo -ne "${info} Waiting for ConsoleKit to register X session (timeout ${consolekittime}s)..."
+		echo -ne "${info} Waiting for ConsoleKit to register X session (timeout ${cktimeout}s)..."
 
-		sleep $consolekittime &
+		sleep $cktimeout &
 		clockpid=$!
-	
+
 		trap "echo -e \"Registered! ${reset}\"" USR1
-	
+
 		#have to store pid of dbus-monitor this way since dbus-monitor will run until killed.
 		fifo=$(mktemp --dry-run)
 		mkfifo --mode=700 $fifo
@@ -300,3 +285,4 @@ xstart() {
 	exit 0
 }
 mainmenu
+
