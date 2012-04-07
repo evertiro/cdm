@@ -3,38 +3,47 @@
 # Example config file for cdm(1).
 # Values set here is the default as in cdm(1).
 
-# Style for the cdm dialog, which is printed with dialog(1).
-# Default to unset, causing dialog(1) to use the system wide default.
-# See /usr/share/cdm/themes for some nice choices.
-dialogrc=
-
-# Index of the first item in the menu.
-countfrom=0
-
 # List of programs, commands with whitespaces should be quoted or escaped.
 # If unset, all sessions in /etc/X11/Sessions are offered as choices.
 #
 # (An example:)
-# binlist=("~/.xsession" "/bin/bash --login" "/usr/bin/fbterm")
+# binlist=(
+#   "~/.xsession"                    # Launch your X session,
+#   "/bin/bash --login"              # or just execute your shell,
+#   "/usr/bin/fbterm"                # or start a frame buffer console,
+#   "/usr/bin/cdm ~/.submenu.cdmrc"  # or go to a submenu :)
+# )
 
 # List all program display names, one-by-one matched with $binlist.
 # Names with whitespaces should be quoted or escaped.
 #
 # (Continued example:)
-# namelist=(XSession Console FBTerm)
+# namelist=("X session" Console FBTerm "Sub menu")
 
 # Type of the programs, one-by-one matched with $binlist.
 # `C' for *C*onsole programs, which would be `exec'ed.
 # `X' for *X* programs, which would be run with cdm-xlaunch(1).
 #
 # (Continued example:)
-# flaglist=(X C C)
+# flaglist=(X C C C)
+
+# Style for the cdm dialog, which is printed with dialog(1).
+# Default to unset, causing dialog(1) to use the system wide default.
+# See /usr/share/doc/cdm/themes for some nice choices.
+dialogrc=
+
+# Index of the first item in the menu.
+countfrom=0
 
 # Set default display.
 display=0
 
 # Where should first X tty be spawned?
 xtty=7
+
+# Additional arguments to pass to X server, which is usually called as:
+#   /usr/bin/X :$display $serverargs vt$((xtty+display))
+serverargs='-nolisten tcp'
 
 # Should cdm(1) stick to the specified display?
 locktty=yes
@@ -44,8 +53,4 @@ consolekit=yes
 
 # Timeout for waiting for X session to register with consolekit.
 cktimeout=5
-
-# Additional arguments to pass to X server; it will be called as:
-#   exec /usr/bin/X :$display $serverargs vt$((xtty+display))
-serverargs='-nolisten tcp'
 

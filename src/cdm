@@ -11,6 +11,7 @@
 #       tigrmesh        finding a critical issue with the gnome-session handler
 #       Profjim         several incredibly useful patches
 #       lambchops468    consolekit and hibernation patches
+#       CasperVector    Massive rearchitecturing and code sanisation
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -29,15 +30,26 @@
 
 name=$(basename "$0")
 longname='Console Display Manager'
-ver='0.5.3'
+ver='0.6'
 
 trap '' SIGINT SIGTSTP
 source /etc/init.d/functions.sh
 
+# Exit functions.
+
+exitnormal() { exit 0; }
+exiterror() { sleep 1; exit 1; }
+
 # Source cdm configurations.
 
 if [[ -n "$1" ]]; then
-	source "$1"
+	if [[ -f "$HOME/.cdmrc" ]]
+	then
+		source "$1"
+	else
+		eerror "$self: config file \`$1' does not exist."
+		exiterror
+	fi
 elif [[ -f "$HOME/.cdmrc" ]]; then
 	source "$HOME/.cdmrc"
 elif [[ -f /etc/cdmrc ]]; then
@@ -56,11 +68,6 @@ display=${display:-0}
 consolekit=${consolekit:-yes}
 cktimeout=${cktimeout:-30}
 serverargs=${serverargs:-'-nolisten tcp'}
-
-# Exit functions.
-
-exitnormal() { exit 0; }
-exiterror() { sleep 1; exit 1; }
 
 # Offer all available sessions in /etc/X11/Sessions,
 # if binlist if not explicitly set in cdmrc.
