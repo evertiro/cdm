@@ -58,16 +58,17 @@ fi
 
 # Default options.
 
-dialogrc=${dialogrc:-}
-countfrom=${countfrom:-0}
 binlist=${binlist:-()}
 namelist=${namelist:-()}
-xtty=${xtty:-7}
-locktty=${locktty:-no}
+flaglist=${flaglist:-()}
+dialogrc=${dialogrc:-}
+countfrom=${countfrom:-0}
 display=${display:-0}
+xtty=${xtty:-7}
+serverargs=${serverargs:-'-nolisten tcp'}
+locktty=${locktty:-no}
 consolekit=${consolekit:-yes}
 cktimeout=${cktimeout:-30}
-serverargs=${serverargs:-'-nolisten tcp'}
 
 # Offer all available sessions in /etc/X11/Sessions,
 # if binlist if not explicitly set in cdmrc.

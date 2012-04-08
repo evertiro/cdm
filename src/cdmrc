@@ -46,11 +46,11 @@ xtty=7
 serverargs='-nolisten tcp'
 
 # Should cdm(1) stick to the specified display?
-locktty=yes
+locktty=no
 
 # Use consolekit for X session?
 consolekit=yes
 
 # Timeout for waiting for X session to register with consolekit.
-cktimeout=5
+cktimeout=30
 
