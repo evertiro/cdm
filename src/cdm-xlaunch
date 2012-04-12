@@ -77,7 +77,7 @@ fi
 # Conform to POSIX and do not use `>&' here.
 sh -i -c "(startx $* > /dev/null 2>&1 &)"
 
-# If `wait' returns with a value >128, it was interrupted by the trap, so registration was sucessful.
+# If wait(1) returns with a value >128, it was interrupted by kill(1), so registration was sucessful.
 if [[ -n "$clockpid" ]]; then
 	if wait "$clockpid" >& /dev/null
 	then
