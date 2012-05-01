@@ -81,7 +81,7 @@ fi
 
 # Generate the main menu.
 menu=()
-for ((count=0; count<${#namelist[@]}; count++)); do
+for ((count = 0; count < ${#namelist[@]}; count++)); do
 	menu=("${menu[@]}" "$((count+countfrom))" "${namelist[${count}]}")
 done
 
@@ -131,7 +131,7 @@ case ${flaglist[$binindex]} in
 		else
 			# Get the first empty display.
 			display=0
-			while [[ "$display" < 7 ]]; do
+			while ((display < 7)); do
 				if dpyinfo=$(xdpyinfo -display ":$display.0" 2>&1 1>/dev/null) ||
 					# Display is in use by another user.
 					[[ "$dpyinfo" == 'No protocol specified'* ]]
