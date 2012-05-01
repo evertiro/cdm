@@ -33,7 +33,7 @@ consolekit=false
 cktimeout=30
 source /etc/init.d/functions.sh
 
-args=`getopt -n "$name" -o ct: -l consolekit,timeout: -- "$@"` || exit 1
+args=$(getopt -n "$name" -o ct: -l consolekit,timeout: -- "$@") || exit 1
 eval set -- "$args"
 for arg in "$@"
 do
