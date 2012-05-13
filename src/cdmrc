@@ -38,15 +38,15 @@ countfrom=0
 # Set default display.
 display=0
 
+# Should cdm(1) stick to the specified display?
+locktty=no
+
 # Where should first X tty be spawned?
 xtty=7
 
 # Additional arguments to pass to X server, which is usually called as:
 #   /usr/bin/X :$display $serverargs vt$((xtty+display))
 serverargs='-nolisten tcp'
-
-# Should cdm(1) stick to the specified display?
-locktty=no
 
 # Use consolekit for X session?
 consolekit=yes

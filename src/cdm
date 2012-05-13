@@ -64,9 +64,9 @@ flaglist=${flaglist:-()}
 dialogrc=${dialogrc:-}
 countfrom=${countfrom:-0}
 display=${display:-0}
+locktty=${locktty:-no}
 xtty=${xtty:-7}
 serverargs=${serverargs:-'-nolisten tcp'}
-locktty=${locktty:-no}
 consolekit=${consolekit:-yes}
 cktimeout=${cktimeout:-30}
 
