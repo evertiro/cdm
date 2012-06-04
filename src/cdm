@@ -112,7 +112,7 @@ case ${flaglist[$binindex]} in
 		# If $bin is a login shell, it might `exec' cdm again, causing an endless
 		# loop. To solve this problem, export $CDM_SPAWN when `exec'ing $bin and
 		# only let the shell automatically `exec' cdm when $CDM_SPAWN is not set.
-		# See also the example shell profile file shipped with this cdm package.
+		# See also the example shell profile file shipped with the cdm package.
 		CDM_SPAWN=$$ exec $bin
 		;;
 
