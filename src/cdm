@@ -47,7 +47,7 @@ if [[ -n "$1" ]]; then
 	then
 		source "$1"
 	else
-		eerror "$self: config file \`$1' does not exist."
+		eerror "$name: config file \`$1' does not exist."
 		exiterror
 	fi
 elif [[ -f "$HOME/.cdmrc" ]]; then
@@ -146,13 +146,13 @@ case ${flaglist[$binindex]} in
 
 		$(yesno consolekit) && launchflags="-c -t $cktimeout"
 		if ! eval cdm-xlaunch $launchflags -- $bin -- $serverargs; then
-			ewarn "$self: \`cdm-xlaunch' exited unsuccessfully."
+			ewarn "$name: \`cdm-xlaunch' exited unsuccessfully."
 			exiterror
 		fi
 		;;
 
 	*)
-		eerror "$self: unknown flag: \`${flaglist[$binindex]}'."
+		eerror "$name: unknown flag: \`${flaglist[$binindex]}'."
 		exiterror
 		;;
 esac
