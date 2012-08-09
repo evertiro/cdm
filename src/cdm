@@ -43,7 +43,7 @@ exiterror() { sleep 1; exit 1; }
 # Source cdm configurations.
 
 if [[ -n "$1" ]]; then
-	if [[ -f "$HOME/.cdmrc" ]]
+	if [[ -f "$1" ]]
 	then
 		source "$1"
 	else
