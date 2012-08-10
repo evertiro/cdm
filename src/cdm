@@ -273,9 +273,9 @@ xstart() {
 	fi
 
 	if $(checkyesno loginshell); then
-		nohup bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
+		setsid bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
 	else
-		nohup startx $wm_bin -- ${serverargs} &> /dev/null &
+		setsid startx $wm_bin -- ${serverargs} &> /dev/null &
 	fi
 
 	if [[ -n $clockpid ]]; then
