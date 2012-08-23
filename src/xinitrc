@@ -1,4 +1,0 @@
-#!/bin/sh
-
-wm_bin="$1"
-exec ${wm_bin}
