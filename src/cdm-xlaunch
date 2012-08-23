@@ -1,0 +1,96 @@
+#!/bin/bash
+#
+#   CDM: The Console Display Manager
+#
+#   Copyright (C) 2009-2011, Daniel J Griffiths <ghost1227@archlinux.us>
+#   Thanks to:
+#
+#       Andrwe          beta-testing and submitting the fix for the all
+#                       important X incrementation function
+#       brisbin33       code cleanup
+#       tigrmesh        finding a critical issue with the gnome-session handler
+#       Profjim         several incredibly useful patches
+#       lambchops468    consolekit and hibernation patches
+#       CasperVector    Massive rearchitecturing and code sanisation
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#   
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#   
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#   MA 02110-1301, USA.
+
+name=$(basename "$0")
+consolekit=false
+cktimeout=30
+
+info() { printf ' \033[01;32m*\033[00m '; echo "$name: $*"; }
+error() { printf ' \033[01;31m*\033[00m '; echo "$name: $*" > /dev/stderr; }
+
+args=$(getopt -n "$name" -o ct: -l consolekit,timeout: -- "$@") || exit 1
+eval set -- "$args"
+for arg in "$@"
+do
+	case $arg in
+		'--consolekit' | '-c')
+			consolekit=true; shift
+			;;
+		'--timeout' | '-t')
+			shift
+			cktimeout=$1; shift
+			;;
+		'--')
+			shift
+			break
+			;;
+	esac
+done
+
+# Do first to avoid race conditions.
+if $consolekit; then
+	info "waiting for ConsoleKit to register X session."
+	sleep "$cktimeout" & clockpid=$!
+	dbuspidfifo=$(mktemp --dry-run --tmpdir $name.XXXXXXXX)
+	if ! mkfifo "$dbuspidfifo"; then
+		error "failed to create FIFO \`$fifo'."
+		exit 1
+	fi
+
+	(dbus-monitor --system 'type=signal,interface=org.freedesktop.ConsoleKit.Seat,member=SessionAdded' & echo $! > "$dbuspidfifo") |
+		sed -un 's@[[:space:]]*object path \"\(/[a-zA-Z0-9/]*\)\"@\1@p' | while read object; do
+			if dbus-send --system --print-reply --dest='org.freedesktop.ConsoleKit' "$object" 'org.freedesktop.ConsoleKit.Session.GetX11Display' |
+				grep -qF "$display"
+			then
+				kill "$clockpid"
+				break
+			fi
+		done &
+	dbuspid=$(<"$dbuspidfifo"); rm -f "$dbuspidfifo"
+fi
+
+# Conform to POSIX and do not use `>&' here.
+sh -i -c "(startx $* > /dev/null 2>&1 &)"
+
+# If wait(1) returns with a value >128, it was interrupted by kill(1),
+# so registration was sucessful.
+if [[ -n "$clockpid" ]]; then
+	if wait "$clockpid" >& /dev/null
+	then
+		kill "$dbuspid"
+		error "ConsoleKit registration timed out."
+		exit 1
+	else
+		kill "$dbuspid"
+		info "ConsoleKit registration succeeded."
+		exit 0
+	fi
+fi
+

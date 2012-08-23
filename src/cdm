@@ -4,292 +4,169 @@
 #
 #   Copyright (C) 2009-2011, Daniel J Griffiths <ghost1227@archlinux.us>
 #   Thanks to:
-#	Andrwe..........beta-testing and submitting the fix for the all 
-#			important X incrementation function
-#	brisbin33.......code cleanup
-#	tigrmesh........finding a critical issue with the gnome-session handler
-#	Profjim.........several incredibly useful patches
-#       lambchops468....consolekit and hibernation patches
 #
-#       This program is free software; you can redistribute it and/or modify
-#       it under the terms of the GNU General Public License as published by
-#       the Free Software Foundation; either version 2 of the License, or
-#       (at your option) any later version.
-#       
-#       This program is distributed in the hope that it will be useful,
-#       but WITHOUT ANY WARRANTY; without even the implied warranty of
-#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#       GNU General Public License for more details.
-#       
-#       You should have received a copy of the GNU General Public License
-#       along with this program; if not, write to the Free Software
-#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#       MA 02110-1301, USA.
-
-name="Console Display Manager"
-ver="0.5.3"
-info="\e[1;34m==>\e[1;37m"
-error="\e[1;31m==>\e[1;37m"
-success="\e[1;32m==>\e[1;37m"
-reset="\e[0m"
-# Ignore SIGINT (^C) and SIGTSTP (^Z)
-trap "" 2 20
-userclientrc=$HOME/.xinitrc
-sysclientrc=/etc/X11/xinit/xinitrc
-# userserverrc=$HOME/.xserverrc
-# sysserverrc=/etc/X11/xinit/xserverrc
-
-# Source cdm configuration
-if [[ -f /etc/cdmrc ]]; then
-	source /etc/cdmrc
-	count=0
-	while [[ ${count} -lt ${#userconfig[@]} ]]; do
-		if [[ "$USER" == "${userconfig[${count}]}" ]]; then
-			${userconfig[${count}]}
-		fi
-		let count=count+1
-	done
-	countfrom=${countfrom:-0}
-	consolekittime=${consolekittime:-30}
-else
-	echo -e "${error} ERROR: A valid cdm configuration was not found!${reset}"
-	echo -e "${info} Logging out.${reset}"
-	sleep 3
-	exit 1
-fi
-
-unset DIALOGRC
-# Source theme file
-if [[ ! -z ${theme} ]]; then
-	if [[ -f /usr/share/cdm/themes/${theme} ]]; then
-		DIALOGRC=/usr/share/cdm/themes/${theme}
-	else
-		echo -e "${info} Theme file ${theme} is invalid, reverting to default theme.${reset}"
-	fi
-fi
-if [[ -z $DIALOGRC ]]; then
-	if [[ -f /usr/share/cdm/themes/default ]]; then
-		DIALOGRC=/usr/share/cdm/themes/default
-	else
-		echo -e "${info} A valid theme file was not found, using system defaults.${reset}"
-	fi
-fi
-
-# Based on FreeBSD's /etc/rc.subr
+#       Andrwe          beta-testing and submitting the fix for the all
+#                       important X incrementation function
+#       brisbin33       code cleanup
+#       tigrmesh        finding a critical issue with the gnome-session handler
+#       Profjim         several incredibly useful patches
+#       lambchops468    consolekit and hibernation patches
+#       CasperVector    Massive rearchitecturing and code sanitation
 #
-# checkyesno var
-#    Test $1 variable, and warn if not set to YES or NO.
-#    Return 0 if it's "yes" (et al), nonzero otherwise.
-#    to make default yes, do "checkyesno var yes"
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#   
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#   
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#   MA 02110-1301, USA.
 
-checkyesno() {
-	local value=${!1}
-	# debug "checkyesno: $1 is set to $value."
-	if [[ -n $2 ]]; then
-		value=${value:-$2}
-	else
-		value=${value:-no}
-	fi
-	case $value in
-	#    "yes", "true", "on", or "1"
-	[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1)
-	return 0
-	;;
-	#    "no", "false", "off", or "0"
-	[Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0)
-	return 1
-	;;
-	*)
-	echo "\$${1} is not set properly." >&2
-	exit 1
-	;;
+name=$(basename "$0")
+longname='Console Display Manager'
+ver='0.6'
+
+trap '' SIGINT SIGTSTP
+
+# Helper functions.
+
+warn() { printf ' \033[01;33m*\033[00m '; echo "$name: $*" > /dev/stderr; }
+error() { printf ' \033[01;31m*\033[00m '; echo "$name: $*" > /dev/stderr; }
+exitnormal() { exit 0; }
+exiterror() { sleep 1; exit 1; }
+yesno()
+{
+	[ -z "$1" ] && return 1
+
+	case "$1" in
+	    [Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1) return 0;; 
+	    [Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0) return 1;; 
+		*) warn "\`$1' is not a valid argument for \`yesno'; using \`no' for now."
 	esac
 }
 
-# If X is already running and locktty=yes, activate it,
-# otherwise, increment.
-if $(checkyesno locktty); then
-	# Verify display exists
-	if [[ -n "${display//[0-9]/}" ]]; then
-		display=0
+# Source cdm configurations.
+
+if [[ -n "$1" ]]; then
+	if [[ -f "$1" ]]
+	then
+		source "$1"
+	else
+		error "config file \`$1' does not exist."
+		exiterror
 	fi
-	# Activate existing X session
-	if xdpyinfo -display :${display}.0 &> /dev/null; then
-		let tty=display+xtty
-		chvt ${tty}
-		exit 0
-	fi
-else
-	# Get the first empty display
-	display=0
-	while [[ ${display} -lt 7 ]]; do
-		if dpyinfo=$(xdpyinfo -display :${display}.0 2>&1 1>/dev/null); then
-			let display=display+1
-		elif [[ $dpyinfo = No\ protocol\ specified* ]]; then
-			# Display is in use by another user
-			let display=display+1
-		elif [[ $dpyinfo = Invalid\ MIT* ]];then
-			let display=display+1
-		else
-			break
-		fi
-	done
+elif [[ -f "$HOME/.cdmrc" ]]; then
+	source "$HOME/.cdmrc"
+elif [[ -f /etc/cdmrc ]]; then
+	source /etc/cdmrc
 fi
 
-mainmenu() {
-	# Generate main menu
-	count=0
-	menu=$(
-		while [[ ${count} -lt ${#wmdisplist[@]} ]]; do
-			echo -ne "$((count+countfrom)) ${wmdisplist[${count}]} "
-			let count=count+1
-		done
+# Default options.
+
+binlist=${binlist:-()}
+namelist=${namelist:-()}
+flaglist=${flaglist:-()}
+dialogrc=${dialogrc:-}
+countfrom=${countfrom:-0}
+display=${display:-0}
+xtty=${xtty:-7}
+locktty=${locktty:-no}
+serverargs=${serverargs:-'-nolisten tcp'}
+consolekit=${consolekit:-yes}
+cktimeout=${cktimeout:-30}
+
+# Offer all available sessions in /etc/X11/Sessions,
+# if binlist if not explicitly set in cdmrc.
+
+if [[ "${#binlist[@]}" == 0 ]]; then
+	binlist=($(ls /etc/X11/Sessions))
+	flaglist=($(sed 's/[[:digit:]]\+/X/g' <<< ${!flaglist[*]}))
+	namelist=(${binlist[@]^})
+fi
+
+# Generate the main menu.
+menu=()
+for ((count = 0; count < ${#namelist[@]}; count++)); do
+	menu=("${menu[@]}" "$((count+countfrom))" "${namelist[${count}]}")
+done
+
+# Override dialog display if only one option is available.
+if [[ "$count" == 1 ]]; then
+	binindex=0
+else
+	# Display selection dialog.
+	binindex=$(
+		DIALOGRC="$dialogrc" dialog --colors --stdout \
+		--backtitle "${longname} v${ver}" \
+		--ok-label ' Select ' --cancel-label ' Exit ' \
+		--menu 'Select session' 0 0 0 "${menu[@]}"
 	)
-
-	# Check if console access is allowed
-	if $(checkyesno allowconsole); then
-		if ! $(checkyesno allowshutdown); then
-			let halt=99
-		fi
-		let console=${#wmdisplist[@]}+countfrom
-		menu="${menu} ${console} Console "
-	fi
-
-	# Check if shutdown access is allowed
-	if $(checkyesno allowshutdown); then
-		if ! $(checkyesno allowconsole); then
-			let halt=${#wmdisplist[@]}
-		else
-			let halt=${#wmdisplist[@]}+1
-		fi
-		let halt=halt+countfrom
-		menu="${menu} ${halt} Shutdown "
-	fi
-	
-	# Override dialog display if only one option is available
-	if ! $(checkyesno allowconsole) && ! $(checkyesno allowshutdown) && [[ ${#wmdisplist[@]} == 1 ]]; then
-		wm=$countfrom
-	else
-		# Display selection dialog
-		wm=$(
-			DIALOGRC="$DIALOGRC" dialog --colors \
-			--backtitle "${name} v${ver}" --stdout \
-			--ok-label " Select " --cancel-label " Logout " \
-			--menu "Select Window Manager" 0 0 0 ${menu}
-		)
-		if [[ $? != 0 ]]; then
-			clear
-			exit 0
-		fi
-	fi
-
-	# Set wm_bin
-	clear
-	if [[ ${wm} -eq ${console} ]]; then
-		exit 2 #2 signals to the profile file to not exit.
-	elif [[ ${wm} -eq ${halt} ]]; then
-		shutdownmenu
-	else
-		let wm=wm-countfrom
-		wm_bin="${wmbinlist[${wm}]}"
-		xstart
-	fi
-}
-
-shutdownmenu() {
-	count=$countfrom
-	haltmenu=$(
-		for opt in Shutdown Reboot Suspend Hibernate; do
-			# Check if suspend/hibernate is enabled
-			if ([[ $opt != Suspend ]] && [[ $opt != Hibernate ]]) ||
-				([[ $opt == Suspend ]] && $(checkyesno allowsuspend)) ||
-				([[ $opt == Hibernate ]] && $(checkyesno allowhibernate)); then
-				echo -ne "$count $opt "
-				let count=count+1
-			fi
-		done
-	)
-
-	# Display shutdown dialog
-	haltopt=$(
-		DIALOGRC="$DIALOGRC" dialog --colors \
-		--backtitle "${name} v${ver}" --stdout \
-		--ok-label " Select " --cancel-label " Cancel " \
-		--menu "Shutdown" 0 0 0 ${haltmenu}
-	)
-	
-	if [[ $? == 0 ]]; then
+	if [[ $? != 0 ]]; then
 		clear
-		if [[ ${haltopt} -eq $countfrom ]]; then
-			${shutdowncommand}
-		elif [[ ${haltopt} -eq $((countfrom+1)) ]]; then
-			${rebootcommand}
-		elif [[ ${haltopt} -eq $((countfrom+2)) ]] && $(checkyesno allowsuspend); then
-			${suspendcommand}
-		else
-			${hibernatecommand}
-		fi
-	else
-		mainmenu
+		exitnormal
 	fi
-}
+fi
 
-xstart() {
-	# Start X
-	if $(checkyesno usexinit); then
-		if [[ -f $userclientrc ]]; then
-			wm_bin="$userclientrc $wm_bin"
-		elif [[ -f $sysclientrc ]]; then
-			wm_bin="$sysclientrc $wm_bin"
-		fi
-	else
-		wm_bin="/usr/share/cdm/xinitrc $wm_bin"
-	fi
+# Run $bin according to its flag.
+let binindex-=countfrom
+bin="${binlist[${binindex}]}"
+case ${flaglist[$binindex]} in
+	# *C*onsole programs.
+	[Cc])
+		clear
+		# If $bin is a login shell, it might `exec' cdm again, causing an endless
+		# loop. To solve this problem, export $CDM_SPAWN when `exec'ing $bin and
+		# only let the shell automatically `exec' cdm when $CDM_SPAWN is not set.
+		# See also the example shell profile file shipped with the cdm package.
+		CDM_SPAWN=$$ exec $bin
+		;;
 
-	serverargs=":${display} ${serverargs} vt$((xtty+display))"
+	# *X* programs.
+	[Xx])
+		clear
 
-	if $(checkyesno consolekit); then #do first to avoid race conditions
-		echo -ne "${info} Waiting for ConsoleKit to register X session (timeout ${consolekittime}s)..."
-
-		sleep $consolekittime &
-		clockpid=$!
-	
-		trap "echo -e \"Registered! ${reset}\"" USR1
-	
-		#have to store pid of dbus-monitor this way since dbus-monitor will run until killed.
-		fifo=$(mktemp --dry-run)
-		mkfifo --mode=700 $fifo
-		(dbus-monitor --system type=signal,interface=org.freedesktop.ConsoleKit.Seat,member=SessionAdded & echo $! > $fifo ) | \
-		 sed -un 's|[[:space:]]*object path \"\(/[a-zA-Z0-9/]*\)\"|\1|p' | while read object; do
-			if dbus-send --system --print-reply  --dest=org.freedesktop.ConsoleKit "$object" org.freedesktop.ConsoleKit.Session.GetX11Display | \
-		       	  grep -qF "$display"; then
-				kill -USR1 $$
-				break
+		# If X is already running and locktty=yes, activate it,
+		# otherwise increment.
+		if $(yesno locktty); then
+			# Activate existing X session.
+			if xdpyinfo -display ":$display.0" &> /dev/null; then
+				chvt "$((display+xtty))"
+				exitnormal
 			fi
-		 done &
-
-		 read dbuspid < $fifo
-		 rm -f $fifo
-	fi
-
-	if $(checkyesno loginshell); then
-		setsid bash --login -c "startx $wm_bin -- ${serverargs}" &> /dev/null &
-	else
-		setsid startx $wm_bin -- ${serverargs} &> /dev/null &
-	fi
-
-	if [[ -n $clockpid ]]; then
-		#if wait returns with a value >128, it was interrupted by the trap, so registration was sucessful.
-		if wait $clockpid; then
-			echo -e "Timed out, giving up.\nCheck to see if you are wrapping your session with ck-launch-session or increase the timeout. ${reset}"
-			kill $dbuspid
-			exit 1
 		else
-			kill $dbuspid $clockpid
-			exit 0
+			# Get the first empty display.
+			display=0
+			while ((display < 7)); do
+				if dpyinfo=$(xdpyinfo -display ":$display.0" 2>&1 1>/dev/null) ||
+					# Display is in use by another user.
+					[[ "$dpyinfo" == 'No protocol specified'* ]] ||
+					# Invalid MIT cookie.
+					[[ "$dpyinfo" == 'Invalid MIT'* ]]
+				then
+					let display+=1
+				else
+					break
+				fi
+			done
 		fi
-	fi
+		serverargs=":${display} $serverargs vt$((xtty+display))"
 
-	exit 0
-}
-mainmenu
+		$(yesno consolekit) && launchflags="-c -t $cktimeout"
+		if ! eval cdm-xlaunch $launchflags -- $bin -- $serverargs; then
+			warn "\`cdm-xlaunch' exited unsuccessfully."
+			exiterror
+		fi
+		;;
+
+	*)
+		error "unknown flag: \`${flaglist[$binindex]}'."
+		exiterror
+		;;
+esac
+

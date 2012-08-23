@@ -1,101 +1,56 @@
-############################
-### GLOBAL CONFIGURATION ###
-############################
+#!/bin/bash
+#
+# Example config file for cdm(1).
+# Values set here is the default as in cdm(1).
 
-# Set CDM theme and dialog options
-theme=cdm
-countfrom=1
+# List of programs, commands with whitespaces should be quoted or escaped.
+# If unset, all sessions in /etc/X11/Sessions are offered as choices.
+#
+# (An example:)
+# binlist=(
+#   "~/.xsession"                    # Launch your X session,
+#   "/bin/bash --login"              # or just execute your shell,
+#   "/usr/bin/fbterm"                # or start a frame buffer console,
+#   "/usr/bin/cdm ~/.submenu.cdmrc"  # or go to a submenu :)
+# )
 
-# List all WM binary names
-wmbinlist=(awesome openbox-session)
+# List all program display names, one-by-one matched with $binlist.
+# Names with whitespaces should be quoted or escaped.
+#
+# (Continued example:)
+# namelist=("X session" Console FBTerm "Sub menu")
 
-# List all WM display names
-wmdisplist=(Awesome Openbox)
+# Type of the programs, one-by-one matched with $binlist.
+# `C' for *C*onsole programs, which would be `exec'ed.
+# `X' for *X* programs, which would be run with cdm-xlaunch(1).
+#
+# (Continued example:)
+# flaglist=(X C C C)
 
-# Allow console login?
-allowconsole=yes
+# Style for the cdm dialog, which is printed with dialog(1).
+# Default to unset, causing dialog(1) to use the system wide default.
+# See /usr/share/doc/cdm/themes for some nice choices.
+dialogrc=
 
-# Allow shutdown?
-allowshutdown=yes
-shutdowncommand='sudo shutdown -h now'
-rebootcommand='sudo shutdown -r now'
+# Index of the first item in the menu.
+countfrom=0
 
-# Allow suspend?
-# Note that this option requires pm-utils
-# to be installed and properly configured.
-allowsuspend=no
-suspendcommand='sudo pm-suspend'
-allowhibernate=no
-hibernatecommand='sudo pm-hibernate'
-
-# Set configuration for specific users?
-userconfig=(courtney)
-
-##########################
-### USER CONFIGURATION ###
-##########################
-
-courtney() {
-	# Set CDM theme
-	theme=lime
-
-	# List user allowed WM binary names
-	wmbinlist=(openbox-session)
-
-	# List user allowed WM display names
-	wmdisplist=(Openbox)
-
-	# Allow console login?
-	allowconsole=yes
-
-	# Allow shutdown?
-	allowshutdown=no
-
-	# Set specific display for user
-	# (Not honored unless locktty=yes)
-	# display=1
-}
-
-############################
-### SYSTEM CONFIGURATION ###
-############################
-
-# Set default display
+# Set default display.
 display=0
 
-# Where should first X tty be spawned?
+# Where should the first X tty be spawned?
 xtty=7
 
-# Restrict tty? (By default, cdm increments X tty, this setting
-# allows administrators to lock users into one specific tty by
-# setting the display=N option on a per-user basis.)
+# Should cdm(1) stick to the specified display?
 locktty=no
 
-# Enable login shell (fixes issues with some keymaps, uses bash).
-# Note that your bash scripts won't have any terminal as stdin when
-# started in this way. This may break some commands, including stty,
-# unless you explicitly check for [ -t 0 ] or that every login shell
-# is also interactive. However, we're sending stdout and stderr to
-# /dev/null, so you won't see the complaints.
-loginshell=no
+# Additional arguments to pass to X server, which is usually called as:
+#   /usr/bin/X :$display $serverargs vt$((xtty+display))
+serverargs='-nolisten tcp'
 
-# The use of consolekit has recently become manditory with hal. However,
-# some users might prefer not using either one. If you don't want to
-# use consolekit, set the following variable to "no".
+# Use consolekit for X session?
 consolekit=yes
 
-# Timeout for waiting for X session to register with consoleKit
-consolekittime=30
+# Timeout for waiting for X session to register with consolekit.
+cktimeout=30
 
-# Additional arguments to pass to X server
-# When usexinit=yes, we use ~/.xinitrc when it exists or /etc/X11/xinit/xinitrc
-# when it doesn't. These are passed the chosen window manager as $1; note that
-# the stock /etc/X11/xinit/xinitrc ignores this and always starts twm and three
-# xterms. Your custom xinitrc should start the window manager supplied as $1
-# instead. There is a sample xinitrc included at /usr/share/cdm/xinitrc.skel.
-# If usexinit=no, then we instead call the chosen window manager directly.
-usexinit=no
-
-# Additional arguments to pass to X server; it will be called as:
-#	exec /usr/bin/X :$display $serverargs vt$((xtty+display))
-serverargs="-nolisten tcp -dpi 96"
