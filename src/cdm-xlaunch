@@ -31,7 +31,9 @@
 name=$(basename "$0")
 consolekit=false
 cktimeout=30
-source /etc/init.d/functions.sh
+
+info() { printf ' \033[01;32m*\033[00m '; echo "$name: $*"; }
+error() { printf ' \033[01;31m*\033[00m '; echo "$name: $*" > /dev/stderr; }
 
 args=$(getopt -n "$name" -o ct: -l consolekit,timeout: -- "$@") || exit 1
 eval set -- "$args"
@@ -54,11 +56,11 @@ done
 
 # Do first to avoid race conditions.
 if $consolekit; then
-	ebegin "$name: waiting for ConsoleKit to register X session"
+	info "waiting for ConsoleKit to register X session."
 	sleep "$cktimeout" & clockpid=$!
 	dbuspidfifo=$(mktemp --dry-run --tmpdir $name.XXXXXXXX)
 	if ! mkfifo "$dbuspidfifo"; then
-		eend "$name: failed to create FIFO \`$fifo'."
+		error "failed to create FIFO \`$fifo'."
 		exit 1
 	fi
 
@@ -77,16 +79,17 @@ fi
 # Conform to POSIX and do not use `>&' here.
 sh -i -c "(startx $* > /dev/null 2>&1 &)"
 
-# If wait(1) returns with a value >128, it was interrupted by kill(1), so registration was sucessful.
+# If wait(1) returns with a value >128, it was interrupted by kill(1), so
+# registration was sucessful.
 if [[ -n "$clockpid" ]]; then
 	if wait "$clockpid" >& /dev/null
 	then
 		kill "$dbuspid"
-		eend "$name: ConsoleKit registration timed out."
+		error "ConsoleKit registration timed out."
 		exit 1
 	else
 		kill "$dbuspid"
-		eend 0
+		info "ConsoleKit registration succeeded."
 		exit 0
 	fi
 fi

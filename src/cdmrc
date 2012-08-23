@@ -38,7 +38,7 @@ countfrom=0
 # Set default display.
 display=0
 
-# Where should first X tty be spawned?
+# Where should the first X tty be spawned?
 xtty=7
 
 # Should cdm(1) stick to the specified display?

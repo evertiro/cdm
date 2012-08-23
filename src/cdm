@@ -33,12 +33,23 @@ longname='Console Display Manager'
 ver='0.6'
 
 trap '' SIGINT SIGTSTP
-source /etc/init.d/functions.sh
 
-# Exit functions.
+# Helper functions.
 
+warn() { printf ' \033[01;33m*\033[00m '; echo "$name: $*" > /dev/stderr; }
+error() { printf ' \033[01;31m*\033[00m '; echo "$name: $*" > /dev/stderr; }
 exitnormal() { exit 0; }
 exiterror() { sleep 1; exit 1; }
+yesno()
+{
+	[ -z "$1" ] && return 1
+
+	case "$1" in
+	    [Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1) return 0;; 
+	    [Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0) return 1;; 
+		*) warn "\`$1' is not a valid argument for \`yesno'; using \`no' for now."
+	esac
+}
 
 # Source cdm configurations.
 
@@ -47,7 +58,7 @@ if [[ -n "$1" ]]; then
 	then
 		source "$1"
 	else
-		eerror "$name: config file \`$1' does not exist."
+		error "config file \`$1' does not exist."
 		exiterror
 	fi
 elif [[ -f "$HOME/.cdmrc" ]]; then
@@ -146,13 +157,13 @@ case ${flaglist[$binindex]} in
 
 		$(yesno consolekit) && launchflags="-c -t $cktimeout"
 		if ! eval cdm-xlaunch $launchflags -- $bin -- $serverargs; then
-			ewarn "$name: \`cdm-xlaunch' exited unsuccessfully."
+			warn "\`cdm-xlaunch' exited unsuccessfully."
 			exiterror
 		fi
 		;;
 
 	*)
-		eerror "$name: unknown flag: \`${flaglist[$binindex]}'."
+		error "unknown flag: \`${flaglist[$binindex]}'."
 		exiterror
 		;;
 esac
