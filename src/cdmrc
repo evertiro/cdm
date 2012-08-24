@@ -48,9 +48,9 @@ locktty=no
 #   /usr/bin/X :$display $serverargs vt$((xtty+display))
 serverargs='-nolisten tcp'
 
-# Use consolekit for X session?
+# Use ConsoleKit for X session?
 consolekit=yes
 
-# Timeout for waiting for X session to register with consolekit.
+# Timeout for waiting for X session to register with ConsoleKit.
 cktimeout=30
 
