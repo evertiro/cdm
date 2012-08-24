@@ -33,7 +33,7 @@ consolekit=false
 cktimeout=30
 
 info() { printf ' \033[01;32m*\033[00m '; echo "$name: $*"; }
-error() { printf ' \033[01;31m*\033[00m '; echo "$name: $*" > /dev/stderr; }
+error() { (printf ' \033[01;31m*\033[00m '; echo "$name: $*") > /dev/stderr; }
 
 args=$(getopt -n "$name" -o ct: -l consolekit,timeout: -- "$@") || exit 1
 eval set -- "$args"
