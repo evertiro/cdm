@@ -162,6 +162,8 @@ case ${flaglist[$binindex]} in
 		if ! eval cdm-xlaunch $launchflags -- $bin -- $serverargs; then
 			warn "\`cdm-xlaunch' exited unsuccessfully."
 			exiterror
+		else
+			exitnormal
 		fi
 		;;
 
