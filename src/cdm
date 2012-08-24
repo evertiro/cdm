@@ -36,8 +36,8 @@ trap '' SIGINT SIGTSTP
 
 # Helper functions.
 
-warn() { printf ' \033[01;33m*\033[00m '; echo "$name: $*" > /dev/stderr; }
-error() { printf ' \033[01;31m*\033[00m '; echo "$name: $*" > /dev/stderr; }
+warn() { (printf ' \033[01;33m*\033[00m '; echo "$name: $*") > /dev/stderr; }
+error() { (printf ' \033[01;31m*\033[00m '; echo "$name: $*") > /dev/stderr; }
 exitnormal() { exit 0; }
 exiterror() { sleep 1; exit 1; }
 yesno()
