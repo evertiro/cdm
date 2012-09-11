@@ -132,31 +132,43 @@ case ${flaglist[$binindex]} in
 	[Xx])
 		clear
 
-		# If X is already running and locktty=yes, activate it,
-		# otherwise increment.
+        # If X is already running and locktty=yes, activate it
 		if $(yesno locktty); then
-			# Activate existing X session.
 			if xdpyinfo -display ":$display.0" &> /dev/null; then
 				chvt "$((display+xtty))"
 				exitnormal
 			fi
+        fi
+
+        # Get the first empty display.
+        display=0
+        while ((display < 7)); do
+            if dpyinfo=$(xdpyinfo -display ":$display.0" 2>&1 1>/dev/null) ||
+                # Display is in use by another user.
+                [[ "$dpyinfo" == 'No protocol specified'* ]] ||
+                # Invalid MIT cookie.
+                [[ "$dpyinfo" == 'Invalid MIT'* ]]
+            then
+                let display+=1
+            else
+                break
+            fi
+        done
+
+        # run X in current tty
+        if [[ $xtty == "keep" ]]; then
+            vt=$(tty)
+            vt=${vt#/dev/}
+            if [[ $vt != tty* ]]; then
+                error "error: invalid TTY"
+                exiterror
+            fi
+            vt=${vt#tty}
 		else
-			# Get the first empty display.
-			display=0
-			while ((display < 7)); do
-				if dpyinfo=$(xdpyinfo -display ":$display.0" 2>&1 1>/dev/null) ||
-					# Display is in use by another user.
-					[[ "$dpyinfo" == 'No protocol specified'* ]] ||
-					# Invalid MIT cookie.
-					[[ "$dpyinfo" == 'Invalid MIT'* ]]
-				then
-					let display+=1
-				else
-					break
-				fi
-			done
+            vt=$((xtty+display))
 		fi
-		serverargs=":${display} $serverargs vt$((xtty+display))"
+
+		serverargs=":${display} $serverargs vt$vt"
 
 		$(yesno consolekit) && launchflags="-c -t $cktimeout"
 		if ! eval cdm-xlaunch $launchflags -- $bin -- $serverargs; then
