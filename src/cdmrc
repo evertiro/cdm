@@ -39,6 +39,7 @@ countfrom=0
 display=0
 
 # Where should the first X tty be spawned?
+# special value 'keep' causes to run X in current tty
 xtty=7
 
 # Should cdm(1) stick to the specified display?

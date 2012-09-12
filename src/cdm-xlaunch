@@ -77,20 +77,21 @@ if $consolekit; then
 fi
 
 # Conform to POSIX and do not use `>&' here.
-sh -i -c "(startx $* > /dev/null 2>&1 &)"
+nohup startx $* > /dev/null 2>&1 &
 
 # If wait(1) returns with a value >128, it was interrupted by kill(1),
 # so registration was sucessful.
-if [[ -n "$clockpid" ]]; then
-	if wait "$clockpid" >& /dev/null
-	then
-		kill "$dbuspid"
-		error "ConsoleKit registration timed out."
-		exit 1
-	else
-		kill "$dbuspid"
-		info "ConsoleKit registration succeeded."
-		exit 0
-	fi
+if $consolekit; then
+    if [[ -n "$clockpid" ]]; then
+        if wait "$clockpid" >& /dev/null
+        then
+            kill "$dbuspid"
+            error "ConsoleKit registration timed out."
+            exit 1
+        else
+            kill "$dbuspid"
+            info "ConsoleKit registration succeeded."
+            exit 0
+        fi
+    fi
 fi
-
