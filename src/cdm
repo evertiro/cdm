@@ -5,13 +5,13 @@
 #   Copyright (C) 2009-2011, Daniel J Griffiths <ghost1227@archlinux.us>
 #   Thanks to:
 #
-#       Andrwe          beta-testing and submitting the fix for the all
-#                       important X incrementation function
-#       brisbin33       code cleanup
-#       tigrmesh        finding a critical issue with the gnome-session handler
-#       Profjim         several incredibly useful patches
-#       lambchops468    consolekit and hibernation patches
-#       CasperVector    Massive rearchitecturing and code sanitation
+#	   Andrwe		  beta-testing and submitting the fix for the all
+#					   important X incrementation function
+#	   brisbin33	   code cleanup
+#	   tigrmesh		finding a critical issue with the gnome-session handler
+#	   Profjim		 several incredibly useful patches
+#	   lambchops468	consolekit and hibernation patches
+#	   CasperVector	Massive rearchitecturing and code sanitation
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -46,8 +46,8 @@ yesno()
 	eval value=\$${1}
 
 	case "$value" in
-	    [Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1) return 0;; 
-	    [Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0) return 1;; 
+		[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1) return 0;; 
+		[Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0) return 1;; 
 		*) warn "Invalid value for \`$1'; falling back to \`no' for now.";;
 	esac
 }
@@ -132,40 +132,40 @@ case ${flaglist[$binindex]} in
 	[Xx])
 		clear
 
-        # If X is already running and locktty=yes, activate it
+		# If X is already running and locktty=yes, activate it
 		if $(yesno locktty); then
 			if xdpyinfo -display ":$display.0" &> /dev/null; then
 				chvt "$((display+xtty))"
 				exitnormal
 			fi
-        fi
+		fi
 
-        # Get the first empty display.
-        display=0
-        while ((display < 7)); do
-            if dpyinfo=$(xdpyinfo -display ":$display.0" 2>&1 1>/dev/null) ||
-                # Display is in use by another user.
-                [[ "$dpyinfo" == 'No protocol specified'* ]] ||
-                # Invalid MIT cookie.
-                [[ "$dpyinfo" == 'Invalid MIT'* ]]
-            then
-                let display+=1
-            else
-                break
-            fi
-        done
+		# Get the first empty display.
+		display=0
+		while ((display < 7)); do
+			if dpyinfo=$(xdpyinfo -display ":$display.0" 2>&1 1>/dev/null) ||
+				# Display is in use by another user.
+				[[ "$dpyinfo" == 'No protocol specified'* ]] ||
+				# Invalid MIT cookie.
+				[[ "$dpyinfo" == 'Invalid MIT'* ]]
+			then
+				let display+=1
+			else
+				break
+			fi
+		done
 
-        # run X in current tty
-        if [[ $xtty == "keep" ]]; then
-            vt=$(tty)
-            vt=${vt#/dev/}
-            if [[ $vt != tty* ]]; then
-                error "error: invalid TTY"
-                exiterror
-            fi
-            vt=${vt#tty}
+		# run X in current tty
+		if [[ $xtty == "keep" ]]; then
+			vt=$(tty)
+			vt=${vt#/dev/}
+			if [[ $vt != tty* ]]; then
+				error "error: invalid TTY"
+				exiterror
+			fi
+			vt=${vt#tty}
 		else
-            vt=$((xtty+display))
+			vt=$((xtty+display))
 		fi
 
 		serverargs=":${display} $serverargs vt$vt"
@@ -185,3 +185,4 @@ case ${flaglist[$binindex]} in
 		;;
 esac
 
+# vim:set ts=4 sw=4 noet:

@@ -5,13 +5,13 @@
 #   Copyright (C) 2009-2011, Daniel J Griffiths <ghost1227@archlinux.us>
 #   Thanks to:
 #
-#       Andrwe          beta-testing and submitting the fix for the all
-#                       important X incrementation function
-#       brisbin33       code cleanup
-#       tigrmesh        finding a critical issue with the gnome-session handler
-#       Profjim         several incredibly useful patches
-#       lambchops468    consolekit and hibernation patches
-#       CasperVector    Massive rearchitecturing and code sanisation
+#	   Andrwe		  beta-testing and submitting the fix for the all
+#					   important X incrementation function
+#	   brisbin33	   code cleanup
+#	   tigrmesh		finding a critical issue with the gnome-session handler
+#	   Profjim		 several incredibly useful patches
+#	   lambchops468	consolekit and hibernation patches
+#	   CasperVector	Massive rearchitecturing and code sanisation
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -82,16 +82,18 @@ nohup startx $* > /dev/null 2>&1 &
 # If wait(1) returns with a value >128, it was interrupted by kill(1),
 # so registration was sucessful.
 if $consolekit; then
-    if [[ -n "$clockpid" ]]; then
-        if wait "$clockpid" >& /dev/null
-        then
-            kill "$dbuspid"
-            error "ConsoleKit registration timed out."
-            exit 1
-        else
-            kill "$dbuspid"
-            info "ConsoleKit registration succeeded."
-            exit 0
-        fi
-    fi
+	if [[ -n "$clockpid" ]]; then
+		if wait "$clockpid" >& /dev/null
+		then
+			kill "$dbuspid"
+			error "ConsoleKit registration timed out."
+			exit 1
+		else
+			kill "$dbuspid"
+			info "ConsoleKit registration succeeded."
+			exit 0
+		fi
+	fi
 fi
+
+# vim:set ts=4 sw=4 noet:
