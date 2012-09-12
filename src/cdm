@@ -42,30 +42,30 @@ exitnormal() { exit 0; }
 exiterror() { sleep 1; exit 1; }
 yesno()
 {
-	[ -z "$1" ] && return 1
-	eval value=\$${1}
+    [ -z "$1" ] && return 1
+    eval value=\$${1}
 
-	case "$value" in
-	    [Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1) return 0;; 
-	    [Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0) return 1;; 
-		*) warn "Invalid value for \`$1'; falling back to \`no' for now.";;
-	esac
+    case "$value" in
+        [Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1) return 0;; 
+        [Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0) return 1;; 
+        *) warn "Invalid value for \`$1'; falling back to \`no' for now.";;
+    esac
 }
 
 # Source cdm configurations.
 
 if [[ -n "$1" ]]; then
-	if [[ -f "$1" ]]
-	then
-		source "$1"
-	else
-		error "config file \`$1' does not exist."
-		exiterror
-	fi
+    if [[ -f "$1" ]]
+    then
+        source "$1"
+    else
+        error "config file \`$1' does not exist."
+        exiterror
+    fi
 elif [[ -f "$HOME/.cdmrc" ]]; then
-	source "$HOME/.cdmrc"
+    source "$HOME/.cdmrc"
 elif [[ -f /etc/cdmrc ]]; then
-	source /etc/cdmrc
+    source /etc/cdmrc
 fi
 
 # Default options.
@@ -86,58 +86,58 @@ cktimeout=${cktimeout:-30}
 # if binlist if not explicitly set in cdmrc.
 
 if [[ "${#binlist[@]}" == 0 ]]; then
-	binlist=($(ls /etc/X11/Sessions))
-	flaglist=($(sed 's/[[:digit:]]\+/X/g' <<< ${!flaglist[*]}))
-	namelist=(${binlist[@]^})
+    binlist=($(ls /etc/X11/Sessions))
+    flaglist=($(sed 's/[[:digit:]]\+/X/g' <<< ${!flaglist[*]}))
+    namelist=(${binlist[@]^})
 fi
 
 # Generate the main menu.
 menu=()
 for ((count = 0; count < ${#namelist[@]}; count++)); do
-	menu=("${menu[@]}" "$((count+countfrom))" "${namelist[${count}]}")
+    menu=("${menu[@]}" "$((count+countfrom))" "${namelist[${count}]}")
 done
 
 # Override dialog display if only one option is available.
 if [[ "$count" == 1 ]]; then
-	binindex=0
+    binindex=0
 else
-	# Display selection dialog.
-	binindex=$(
-		DIALOGRC="$dialogrc" dialog --colors --stdout \
-		--backtitle "${longname} v${ver}" \
-		--ok-label ' Select ' --cancel-label ' Exit ' \
-		--menu 'Select session' 0 0 0 "${menu[@]}"
-	)
-	if [[ $? != 0 ]]; then
-		clear
-		exitnormal
-	fi
+    # Display selection dialog.
+    binindex=$(
+        DIALOGRC="$dialogrc" dialog --colors --stdout \
+        --backtitle "${longname} v${ver}" \
+        --ok-label ' Select ' --cancel-label ' Exit ' \
+        --menu 'Select session' 0 0 0 "${menu[@]}"
+    )
+    if [[ $? != 0 ]]; then
+        clear
+        exitnormal
+    fi
 fi
 
 # Run $bin according to its flag.
 let binindex-=countfrom
 bin="${binlist[${binindex}]}"
 case ${flaglist[$binindex]} in
-	# *C*onsole programs.
-	[Cc])
-		clear
-		# If $bin is a login shell, it might `exec' cdm again, causing an endless
-		# loop. To solve this problem, export $CDM_SPAWN when `exec'ing $bin and
-		# only let the shell automatically `exec' cdm when $CDM_SPAWN is not set.
-		# See also the example shell profile file shipped with the cdm package.
-		CDM_SPAWN=$$ exec $bin
-		;;
+    # *C*onsole programs.
+    [Cc])
+        clear
+        # If $bin is a login shell, it might `exec' cdm again, causing an endless
+        # loop. To solve this problem, export $CDM_SPAWN when `exec'ing $bin and
+        # only let the shell automatically `exec' cdm when $CDM_SPAWN is not set.
+        # See also the example shell profile file shipped with the cdm package.
+        CDM_SPAWN=$$ exec $bin
+        ;;
 
-	# *X* programs.
-	[Xx])
-		clear
+    # *X* programs.
+    [Xx])
+        clear
 
         # If X is already running and locktty=yes, activate it
-		if $(yesno locktty); then
-			if xdpyinfo -display ":$display.0" &> /dev/null; then
-				chvt "$((display+xtty))"
-				exitnormal
-			fi
+        if $(yesno locktty); then
+            if xdpyinfo -display ":$display.0" &> /dev/null; then
+                chvt "$((display+xtty))"
+                exitnormal
+            fi
         fi
 
         # Get the first empty display.
@@ -164,24 +164,25 @@ case ${flaglist[$binindex]} in
                 exiterror
             fi
             vt=${vt#tty}
-		else
+        else
             vt=$((xtty+display))
-		fi
+        fi
 
-		serverargs=":${display} $serverargs vt$vt"
+        serverargs=":${display} $serverargs vt$vt"
 
-		$(yesno consolekit) && launchflags="-c -t $cktimeout"
-		if ! eval cdm-xlaunch $launchflags -- $bin -- $serverargs; then
-			warn "\`cdm-xlaunch' exited unsuccessfully."
-			exiterror
-		else
-			exitnormal
-		fi
-		;;
+        $(yesno consolekit) && launchflags="-c -t $cktimeout"
+        if ! eval cdm-xlaunch $launchflags -- $bin -- $serverargs; then
+            warn "\`cdm-xlaunch' exited unsuccessfully."
+            exiterror
+        else
+            exitnormal
+        fi
+        ;;
 
-	*)
-		error "unknown flag: \`${flaglist[$binindex]}'."
-		exiterror
-		;;
+    *)
+        error "unknown flag: \`${flaglist[$binindex]}'."
+        exiterror
+        ;;
 esac
 
+# vim:set ts=4 sw=4 et:

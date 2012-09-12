@@ -39,41 +39,41 @@ args=$(getopt -n "$name" -o ct: -l consolekit,timeout: -- "$@") || exit 1
 eval set -- "$args"
 for arg in "$@"
 do
-	case $arg in
-		'--consolekit' | '-c')
-			consolekit=true; shift
-			;;
-		'--timeout' | '-t')
-			shift
-			cktimeout=$1; shift
-			;;
-		'--')
-			shift
-			break
-			;;
-	esac
+    case $arg in
+        '--consolekit' | '-c')
+            consolekit=true; shift
+            ;;
+        '--timeout' | '-t')
+            shift
+            cktimeout=$1; shift
+            ;;
+        '--')
+            shift
+            break
+            ;;
+    esac
 done
 
 # Do first to avoid race conditions.
 if $consolekit; then
-	info "waiting for ConsoleKit to register X session."
-	sleep "$cktimeout" & clockpid=$!
-	dbuspidfifo=$(mktemp --dry-run --tmpdir $name.XXXXXXXX)
-	if ! mkfifo "$dbuspidfifo"; then
-		error "failed to create FIFO \`$fifo'."
-		exit 1
-	fi
+    info "waiting for ConsoleKit to register X session."
+    sleep "$cktimeout" & clockpid=$!
+    dbuspidfifo=$(mktemp --dry-run --tmpdir $name.XXXXXXXX)
+    if ! mkfifo "$dbuspidfifo"; then
+        error "failed to create FIFO \`$fifo'."
+        exit 1
+    fi
 
-	(dbus-monitor --system 'type=signal,interface=org.freedesktop.ConsoleKit.Seat,member=SessionAdded' & echo $! > "$dbuspidfifo") |
-		sed -un 's@[[:space:]]*object path \"\(/[a-zA-Z0-9/]*\)\"@\1@p' | while read object; do
-			if dbus-send --system --print-reply --dest='org.freedesktop.ConsoleKit' "$object" 'org.freedesktop.ConsoleKit.Session.GetX11Display' |
-				grep -qF "$display"
-			then
-				kill "$clockpid"
-				break
-			fi
-		done &
-	dbuspid=$(<"$dbuspidfifo"); rm -f "$dbuspidfifo"
+    (dbus-monitor --system 'type=signal,interface=org.freedesktop.ConsoleKit.Seat,member=SessionAdded' & echo $! > "$dbuspidfifo") |
+        sed -un 's@[[:space:]]*object path \"\(/[a-zA-Z0-9/]*\)\"@\1@p' | while read object; do
+            if dbus-send --system --print-reply --dest='org.freedesktop.ConsoleKit' "$object" 'org.freedesktop.ConsoleKit.Session.GetX11Display' |
+                grep -qF "$display"
+            then
+                kill "$clockpid"
+                break
+            fi
+        done &
+    dbuspid=$(<"$dbuspidfifo"); rm -f "$dbuspidfifo"
 fi
 
 # Conform to POSIX and do not use `>&' here.
@@ -95,3 +95,5 @@ if $consolekit; then
         fi
     fi
 fi
+
+# vim:set ts=4 sw=4 et:
