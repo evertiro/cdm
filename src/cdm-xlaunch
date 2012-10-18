@@ -77,7 +77,7 @@ if $consolekit; then
 fi
 
 # Conform to POSIX and do not use `>&' here.
-nohup startx $* > /dev/null 2>&1 &
+setsid startx $* > /dev/null 2>&1 &
 
 # If wait(1) returns with a value >128, it was interrupted by kill(1),
 # so registration was sucessful.
