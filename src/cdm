@@ -125,6 +125,12 @@ case ${flaglist[$binindex]} in
         # loop. To solve this problem, export $CDM_SPAWN when `exec'ing $bin and
         # only let the shell automatically `exec' cdm when $CDM_SPAWN is not set.
         # See also the example shell profile file shipped with the cdm package.
+
+        # Also untrap SIGINT and SIGTSTP before spawning process: If this is not
+        # done, *ANY* child process of *ANY* child (bash) shell will completely
+        # ignore SIGINT, which is rather confusing, and cannot be undone.
+
+        trap - SIGINT SIGTSTP
         CDM_SPAWN=$$ exec $bin
         ;;
 
