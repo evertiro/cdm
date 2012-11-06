@@ -85,7 +85,7 @@ cktimeout=${cktimeout:-30}
 # Offer all available sessions in /etc/X11/Sessions,
 # if binlist if not explicitly set in cdmrc.
 
-if [[ "${#binlist[@]}" == 0 ]]; then
+if [[ "$binlist" == "()" ]]; then
     binlist=($(ls /etc/X11/Sessions))
     flaglist=($(sed 's/[[:digit:]]\+/X/g' <<< ${!flaglist[*]}))
     namelist=(${binlist[@]^})
