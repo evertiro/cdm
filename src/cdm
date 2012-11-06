@@ -87,7 +87,9 @@ cktimeout=${cktimeout:-30}
 
 if [[ "$binlist" == "()" ]]; then
     binlist=($(ls /etc/X11/Sessions))
-    flaglist=($(sed 's/[[:digit:]]\+/X/g' <<< ${!flaglist[*]}))
+    for ((i=0; i<${#binlist[@]}; i++)); do
+        declare flaglist[$i]="X"
+    done
     namelist=(${binlist[@]^})
 fi
 
