@@ -85,10 +85,12 @@ cktimeout=${cktimeout:-30}
 # Offer all available sessions in /etc/X11/Sessions,
 # if binlist if not explicitly set in cdmrc.
 
-if [[ "${#binlist[@]}" == 0 ]]; then
-    binlist=($(ls /etc/X11/Sessions))
-    flaglist=($(sed 's/[[:digit:]]\+/X/g' <<< ${!flaglist[*]}))
-    namelist=(${binlist[@]^})
+if [[ "$binlist" == "()" ]]; then
+    binlist=($(find /etc/X11/Sessions -maxdepth 1 -type f))
+    for ((i=0; i<${#binlist[@]}; i++)); do
+        declare flaglist[$i]="X"
+        declare namelist[$i]=$(basename ${binlist[$i]})
+    done
 fi
 
 # Generate the main menu.
