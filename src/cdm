@@ -104,7 +104,7 @@ else
     # Display selection dialog.
     binindex=$(
         DIALOGRC="$dialogrc" dialog --colors --stdout \
-        --backtitle "${longname} v${ver}" \
+        --backtitle "$longname v$ver" \
         --ok-label ' Select ' --cancel-label ' Exit ' \
         --menu 'Select session' 0 0 0 "${menu[@]}"
     )
@@ -116,7 +116,7 @@ fi
 
 # Run $bin according to its flag.
 let binindex-=countfrom
-bin="${binlist[${binindex}]}"
+bin=($(eval echo "${binlist[${binindex}]}"))
 case ${flaglist[$binindex]} in
     # *C*onsole programs.
     [Cc])
@@ -132,7 +132,7 @@ case ${flaglist[$binindex]} in
         # ignore SIGINT, which is rather confusing, and cannot be undone.
 
         trap - SIGINT SIGTSTP
-        CDM_SPAWN=$$ exec $bin
+        CDM_SPAWN=$$ exec "${bin[@]}"
         ;;
 
     # *X* programs.
@@ -175,7 +175,8 @@ case ${flaglist[$binindex]} in
         serverargs=(":${display}" "${serverargs[@]}" "vt$vt")
 
         $(yesno consolekit) && launchflags=(-c -t "$cktimeout")
-        if cdm-xlaunch "${launchflags[@]}" -- "$bin" -- "${serverargs[@]}"; then
+        if cdm-xlaunch "${launchflags[@]}" -- "${bin[@]}" -- "${serverargs[@]}"
+        then
             exitnormal
         else
             warn "\`cdm-xlaunch' exited unsuccessfully."

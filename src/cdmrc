@@ -8,10 +8,10 @@
 #
 # (An example:)
 # binlist=(
-#   "$HOME/.xsession"                    # Launch your X session,
-#   '/bin/bash --login'                  # or just execute your shell,
-#   '/usr/bin/fbterm'                    # or start a frame buffer console,
-#   "/usr/bin/cdm $HOME/.submenu.cdmrc"  # or go to a submenu :)
+#   '~/.xsession'                    # Launch your X session,
+#   '/bin/bash --login'              # or just execute your shell,
+#   '/usr/bin/fbterm'                # or start a frame buffer console,
+#   '/usr/bin/cdm ~/.submenu.cdmrc'  # or go to a submenu :)
 # )
 
 # List all program display names, one-by-one matched with $binlist.
