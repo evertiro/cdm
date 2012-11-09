@@ -56,7 +56,7 @@ done
 
 # Do first to avoid race conditions.
 if $consolekit; then
-    info "waiting for ConsoleKit to register X session."
+    info 'waiting for ConsoleKit to register X session.'
     sleep "$cktimeout" & clockpid=$!
     dbuspidfifo=$(mktemp --dry-run --tmpdir $name.XXXXXXXX)
     if ! mkfifo "$dbuspidfifo"; then
@@ -86,11 +86,11 @@ if $consolekit; then
         if wait "$clockpid" >& /dev/null
         then
             kill "$dbuspid"
-            error "ConsoleKit registration timed out."
+            error 'ConsoleKit registration timed out.'
             exit 1
         else
             kill "$dbuspid"
-            info "ConsoleKit registration succeeded."
+            info 'ConsoleKit registration succeeded.'
             exit 0
         fi
     fi

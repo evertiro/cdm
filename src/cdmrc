@@ -8,17 +8,17 @@
 #
 # (An example:)
 # binlist=(
-#   "~/.xsession"                    # Launch your X session,
-#   "/bin/bash --login"              # or just execute your shell,
-#   "/usr/bin/fbterm"                # or start a frame buffer console,
-#   "/usr/bin/cdm ~/.submenu.cdmrc"  # or go to a submenu :)
+#   '~/.xsession'                    # Launch your X session,
+#   '/bin/bash --login'              # or just execute your shell,
+#   '/usr/bin/fbterm'                # or start a frame buffer console,
+#   '/usr/bin/cdm ~/.submenu.cdmrc'  # or go to a submenu :)
 # )
 
 # List all program display names, one-by-one matched with $binlist.
 # Names with whitespaces should be quoted or escaped.
 #
 # (Continued example:)
-# namelist=("X session" Console FBTerm "Sub menu")
+# namelist=('X session' Console FBTerm 'Sub menu')
 
 # Type of the programs, one-by-one matched with $binlist.
 # `C' for *C*onsole programs, which would be `exec'ed.
@@ -39,7 +39,7 @@ countfrom=0
 display=0
 
 # Where should the first X tty be spawned?
-# special value 'keep' causes to run X in current tty
+# special value `keep' causes to run X in current tty.
 xtty=7
 
 # Should cdm(1) stick to the specified display?
