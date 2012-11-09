@@ -37,7 +37,7 @@ Thanks to:
     tigrmesh        finding a critical issue with the gnome-session handler
     Profjim         several incredibly useful patches
     lambchops468    consolekit and hibernation patches
-    CasperVector    Massive rearchitecturing and code sanisation
+    CasperVector    Massive rearchitecturing and code sanitation
 
 Licensed under GPLv2+
 
