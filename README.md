@@ -6,13 +6,15 @@ Invocation
 ----------
 
 To run cdm, use
-	$ cdm [RCFILE]
+
+    $ cdm [RCFILE]
 
 cdm tries to source configuration files in this order, and uses the first
 existing one:
-	[RCFILE specified on command line]
-	$HOME/.cdmrc
-	/etc/cdmrc
+
+    [RCFILE specified on command line]
+    $HOME/.cdmrc
+    /etc/cdmrc
 
 To autostart cdm when you log in your account, copy the content of
 /usr/share/doc/cdm/profile.sh to the tail of your shell profile (~/.profile,
@@ -37,7 +39,7 @@ Thanks to:
     tigrmesh        finding a critical issue with the gnome-session handler
     Profjim         several incredibly useful patches
     lambchops468    consolekit and hibernation patches
-    CasperVector    Massive rearchitecturing and code sanisation
+    CasperVector    Massive rearchitecturing and code sanitation
 
 Licensed under GPLv2+
 
