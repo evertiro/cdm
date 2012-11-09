@@ -87,10 +87,8 @@ serverargs=${serverargs:-'-nolisten tcp'}
 
 if [[ "${#binlist[@]}" == 0 ]]; then
     binlist=($(find /etc/X11/Sessions -maxdepth 1 -type f))
-    for ((i=0; i<${#binlist[@]}; i++)); do
-        declare flaglist[$i]="X"
-        declare namelist[$i]=$(basename ${binlist[$i]})
-    done
+    flaglist=($(sed 's/[[:digit:]]\+/X/g' <<< ${!binlist[@]}))
+    namelist=(${binlist[@]##*/})
 fi
 
 # Generate the main menu.
