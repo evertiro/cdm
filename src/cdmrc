@@ -45,13 +45,14 @@ xtty=7
 # Should cdm(1) stick to the specified display?
 locktty=no
 
-# Additional arguments to pass to X server, which is usually called as:
-#   /usr/bin/X :$display $serverargs vt$((xtty+display))
-serverargs='-nolisten tcp'
-
 # Use ConsoleKit for X session?
 consolekit=yes
 
 # Timeout for waiting for X session to register with ConsoleKit.
 cktimeout=30
+
+# Additional arguments to pass to X server, which is usually called as:
+#   /usr/bin/X :$display "${serverargs[@]}" vt$((xtty+display))
+# Arguments with whitespaces should be quoted or escaped.
+serverargs=(-nolisten tcp)
 

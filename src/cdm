@@ -70,9 +70,6 @@ fi
 
 # Default options.
 
-[[ -z "${binlist[*]}" ]] && binlist=()
-[[ -z "${namelist[*]}" ]] && namelist=()
-[[ -z "${flaglist[*]}" ]] && flaglist=()
 dialogrc=${dialogrc:-}
 countfrom=${countfrom:-0}
 display=${display:-0}
@@ -80,7 +77,10 @@ xtty=${xtty:-7}
 locktty=${locktty:-no}
 consolekit=${consolekit:-yes}
 cktimeout=${cktimeout:-30}
-serverargs=${serverargs:-'-nolisten tcp'}
+[[ -z "${binlist[*]}" ]] && binlist=()
+[[ -z "${namelist[*]}" ]] && namelist=()
+[[ -z "${flaglist[*]}" ]] && flaglist=()
+[[ -z "${serverargs[*]}" ]] && serverargs=(-nolisten tcp)
 
 # Offer all available sessions in /etc/X11/Sessions,
 # if $binlist if not explicitly set in cdmrc.
@@ -172,14 +172,14 @@ case ${flaglist[$binindex]} in
             vt="$((xtty+display))"
         fi
 
-        serverargs=":${display} $serverargs vt$vt"
+        serverargs=(":${display}" "${serverargs[@]}" "vt$vt")
 
-        $(yesno consolekit) && launchflags="-c -t $cktimeout"
-        if ! eval cdm-xlaunch $launchflags -- $bin -- $serverargs; then
+        $(yesno consolekit) && launchflags=(-c -t "$cktimeout")
+        if cdm-xlaunch "${launchflags[@]}" -- "$bin" -- "${serverargs[@]}"; then
+            exitnormal
+        else
             warn "\`cdm-xlaunch' exited unsuccessfully."
             exiterror
-        else
-            exitnormal
         fi
         ;;
 
