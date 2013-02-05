@@ -12,6 +12,7 @@ title_color = (BLUE,WHITE,ON)
 
 # Dialog box border color
 border_color = (BLUE,BLACK,ON)
+border2_color = (BLUE,BLACK,ON)
 
 # Active button color
 button_active_color = (CYAN,BLACK,ON)
@@ -36,6 +37,7 @@ menubox_color = (BLUE,BLACK,OFF)
 
 # Menu box border color
 menubox_border_color = (BLUE,BLACK,ON)
+menubox_border2_color = (BLUE,BLACK,ON)
 
 # Item color
 item_color = (BLUE,BLACK,OFF)
