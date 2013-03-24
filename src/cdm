@@ -91,6 +91,33 @@ if [[ "${#binlist[@]}" == 0 ]]; then
     namelist=(${binlist[@]##*/})
 fi
 
+# If $binlist is not set in cdmrc or by files in /etc/X11/Sessions,
+# try .desktop files in /usr/share/xsessions/ .
+
+if [[ "${#binlist[@]}" == 0 ]]; then
+    desktopsessions=($(find /usr/share/xsessions/ -regex .\*.desktop))
+    #TODO: allow full quoting and expansion according to desktop entry spec:
+    # http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
+
+    for ((count=0; count < ${#desktopsessions[@]}; count++)); do
+        # TryExec key is there to determine if executable is present,
+        # but as we are going to test the Exec key anyway, we ignore it.
+        execkey=$(sed -n -e 's/^Exec=//p' <${desktopsessions[${count}]})
+        namekey=$(sed -n -e 's/^Name=//p' <${desktopsessions[${count}]})
+        if [[ -n ${execkey} && -n ${namekey} ]]; then
+            # The .desktop files allow there Exec keys to use $PATH lookup.
+            binitem="$(which $(cut -f 1 -d ' ' <<< ${execkey}))"
+            binargs="$(cut -s -f 2- -d ' ' <<< ${execkey})"
+            # If which fails to return valid path, skip to next .desktop file.
+            if [ -z $binitem ]; then continue; fi
+            if [ -n $binargs ]; then binitem+=" ${binargs}"; fi
+            binlist+=("${binitem}")
+            flaglist+=('X')
+            namelist+=("${namekey}")
+        fi
+    done
+fi
+
 # Generate the main menu.
 menu=()
 for ((count = 0; count < ${#namelist[@]}; count++)); do
