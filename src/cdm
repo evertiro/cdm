@@ -85,7 +85,7 @@ cktimeout=${cktimeout:-30}
 # Offer all available sessions in /etc/X11/Sessions,
 # if $binlist if not explicitly set in cdmrc.
 
-if [[ "${#binlist[@]}" == 0 ]]; then
+if [[ "${#binlist[@]}" == 0 && -d /etc/X11/Sessions ]]; then
     binlist=($(find /etc/X11/Sessions -maxdepth 1 -type f))
     flaglist=($(sed 's/[[:digit:]]\+/X/g' <<< ${!binlist[@]}))
     namelist=(${binlist[@]##*/})
@@ -94,7 +94,7 @@ fi
 # If $binlist is not set in cdmrc or by files in /etc/X11/Sessions,
 # try .desktop files in /usr/share/xsessions/ .
 
-if [[ "${#binlist[@]}" == 0 ]]; then
+if [[ "${#binlist[@]}" == 0 && -d /usr/share/xsessions ]]; then
     desktopsessions=($(find /usr/share/xsessions/ -regex .\*.desktop))
     #TODO: allow full quoting and expansion according to desktop entry spec:
     # http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
