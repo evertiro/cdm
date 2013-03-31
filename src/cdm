@@ -118,37 +118,38 @@ if [[ "${#binlist[@]}" == 0 ]]; then
     done
 fi
 
-# Generate the main menu.
-menu=()
-for ((count = 0; count < ${#namelist[@]}; count++)); do
-    menu=("${menu[@]}" "$((count+countfrom))" "${namelist[${count}]}")
-done
-
-# Override dialog display if only one option is available.
-if [[ "$count" == 1 ]]; then
-    binindex=0
-else
-    # Display selection dialog.
-    binindex=$(
-        DIALOGRC="$dialogrc" dialog --colors --stdout \
-        --backtitle "$longname v$ver" \
-        --ok-label ' Select ' --cancel-label ' Exit ' \
-        --menu 'Select session' 0 0 0 "${menu[@]}"
-    )
-    if [[ $? != 0 ]]; then
+case "${#binlist[@]}" in
+    0)
+        error "No programs found in cdm config file, /etc/X11/Sessions or /usr/share/xsessions."
+        exiterror
+        ;;
+    1)
+        # No need to call dialog AND clear, only one possible program
+        binindex=0
+        ;;
+    *)
+        menu=()
+        for ((count = 0; count < ${#namelist[@]}; count++)); do
+            menu=("${menu[@]}" "$((count+countfrom))" "${namelist[${count}]}")
+        done
+        binindex=$(
+            DIALOGRC="$dialogrc" dialog --colors --stdout \
+            --backtitle "$longname v$ver" --ok-label ' Select ' \
+            --cancel-label ' Exit ' --menu 'Select session' 0 0 0 "${menu[@]}"
+        )
+        if [[ $? != 0 ]]; then
+            clear; exitnormal
+        fi
         clear
-        exitnormal
-    fi
-fi
+        let binindex-=countfrom
+        ;;
+esac
 
 # Run $bin according to its flag.
-let binindex-=countfrom
 bin=($(eval echo "${binlist[${binindex}]}"))
 case ${flaglist[$binindex]} in
     # *C*onsole programs.
     [Cc])
-        clear
-
         # If $bin is a login shell, it might `exec' cdm again, causing an endless
         # loop. To solve this problem, export $CDM_SPAWN when `exec'ing $bin and
         # only let the shell automatically `exec' cdm when $CDM_SPAWN is not set.
@@ -164,8 +165,6 @@ case ${flaglist[$binindex]} in
 
     # *X* programs.
     [Xx])
-        clear
-
         # If X is already running and locktty=yes, activate it.
         if $(yesno locktty) && xdpyinfo -display ":$display.0" &> /dev/null; then
             chvt "$((display+xtty))"
