@@ -77,6 +77,7 @@ xtty=${xtty:-7}
 locktty=${locktty:-no}
 consolekit=${consolekit:-yes}
 cktimeout=${cktimeout:-30}
+altstartx=${altstartx:-no}
 [[ -z "${binlist[*]}" ]] && binlist=()
 [[ -z "${namelist[*]}" ]] && namelist=()
 [[ -z "${flaglist[*]}" ]] && flaglist=()
@@ -202,6 +203,7 @@ case ${flaglist[$binindex]} in
         serverargs=(":${display}" "${serverargs[@]}" "vt$vt")
 
         $(yesno consolekit) && launchflags=(-c -t "$cktimeout")
+        $(yesno altstartx) && launchflags=("${launchflags[@]}" --altstartx)
         if cdm-xlaunch "${launchflags[@]}" -- "${bin[@]}" -- "${serverargs[@]}"
         then
             exitnormal

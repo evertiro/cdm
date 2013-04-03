@@ -31,11 +31,12 @@
 name=$(basename "$0")
 consolekit=false
 cktimeout=30
+altstartx=false
 
 info() { printf ' \033[01;32m*\033[00m '; echo "$name: $*"; }
 error() { (printf ' \033[01;31m*\033[00m '; echo "$name: $*") > /dev/stderr; }
 
-args=$(getopt -n "$name" -o ct: -l consolekit,timeout: -- "$@") || exit 1
+args=$(getopt -n "$name" -o ct: -l consolekit,timeout,altstartx: -- "$@") || exit 1
 eval set -- "$args"
 for arg in "$@"
 do
@@ -46,6 +47,9 @@ do
         '--timeout' | '-t')
             shift
             cktimeout=$1; shift
+            ;;
+        '--altstartx')
+            altstartx=true; shift
             ;;
         '--')
             shift
@@ -76,7 +80,13 @@ if $consolekit; then
     dbuspid=$(<"$dbuspidfifo"); rm -f "$dbuspidfifo"
 fi
 
-$(setsid startx "$@" > /dev/null 2>&1) &
+if $altstartx; then
+    # Alternative method of calling setsid(/startx) for systems that are unresponsive to the 'normal' call.
+    # This method should be avoided because this implementation keeps extra background processes, waiting for startx to return.
+    $(setsid startx "$@" > /dev/null 2>&1) &
+else
+    setsid startx "$@" > /dev/null 2>&1 &
+fi
 
 # If wait(1) returns with a value >128, it was interrupted by kill(1),
 # so registration was sucessful.
