@@ -56,3 +56,8 @@ cktimeout=30
 # Arguments with whitespaces should be quoted or escaped.
 serverargs=(-nolisten tcp)
 
+# Alternative method of calling startx(/setsid). Should only be set if cdm
+# does not start X as expected (bash -x shows call to setsid startx, but for
+# no apparent reason does not start X).
+# Only provided in the hope it may be useful, not a guaranteed fix.
+altstartx=no
