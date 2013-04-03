@@ -4,7 +4,8 @@
 # Values set here is the default as in cdm(1).
 
 # List of programs, commands with whitespaces should be quoted or escaped.
-# If unset, all sessions in /etc/X11/Sessions are offered as choices.
+# If unset, all sessions in /etc/X11/Sessions or /usr/share/xsessions are
+# offered as choices.
 #
 # (An example:)
 # binlist=(
