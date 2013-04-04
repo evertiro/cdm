@@ -108,11 +108,9 @@ if [[ "${#binlist[@]}" == 0 && -d /usr/share/xsessions ]]; then
         if [[ -n ${execkey} && -n ${namekey} ]]; then
             # The .desktop files allow there Exec keys to use $PATH lookup.
             binitem="$(which $(cut -f 1 -d ' ' <<< ${execkey}))"
-            binargs="$(cut -s -f 2- -d ' ' <<< ${execkey})"
             # If which fails to return valid path, skip to next .desktop file.
-            if [ -z $binitem ]; then continue; fi
-            if [ -n $binargs ]; then binitem+=" ${binargs}"; fi
-            binlist+=("${binitem}")
+            if [[ $? != 0 ]]; then continue; fi
+            binlist+=("${binitem} $(cut -s -f 2- -d ' ' <<< ${execkey})")
             flaglist+=('X')
             namelist+=("${namekey}")
         fi
