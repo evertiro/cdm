@@ -82,8 +82,7 @@ fi
 
 if $altstartx; then
     # Alternative method of calling setsid(/startx) for systems that are unresponsive to the 'normal' call.
-    # This method should be avoided because this implementation keeps extra background processes, waiting for startx to return.
-    $(setsid startx "$@" > /dev/null 2>&1) &
+    (setsid startx "$@" > /dev/null 2>&1 &)
 else
     setsid startx "$@" > /dev/null 2>&1 &
 fi
