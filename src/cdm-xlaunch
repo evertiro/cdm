@@ -32,11 +32,12 @@ name=$(basename "$0")
 consolekit=false
 cktimeout=30
 altstartx=false
+startxlog=/dev/null
 
 info() { printf ' \033[01;32m*\033[00m '; echo "$name: $*"; }
 error() { (printf ' \033[01;31m*\033[00m '; echo "$name: $*") > /dev/stderr; }
 
-args=$(getopt -n "$name" -o ct: -l consolekit,timeout,altstartx: -- "$@") || exit 1
+args=$(getopt -n "$name" -o ct: -l consolekit,timeout:,altstartx,startxlog: -- "$@") || exit 1
 eval set -- "$args"
 for arg in "$@"
 do
@@ -50,6 +51,10 @@ do
             ;;
         '--altstartx')
             altstartx=true; shift
+            ;;
+        '--startxlog')
+            shift
+            startxlog=$1; shift
             ;;
         '--')
             shift
@@ -82,9 +87,9 @@ fi
 
 if $altstartx; then
     # Alternative method of calling setsid(/startx) for systems that are unresponsive to the 'normal' call.
-    (setsid startx "$@" > /dev/null 2>&1 &)
+    (setsid startx "$@" > "$startxlog" 2>&1 &)
 else
-    setsid startx "$@" > /dev/null 2>&1 &
+    setsid startx "$@" > "$startxlog" 2>&1 &
 fi
 
 # If wait(1) returns with a value >128, it was interrupted by kill(1),
