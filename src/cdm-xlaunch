@@ -87,9 +87,9 @@ fi
 
 if $altstartx; then
     # Alternative method of calling setsid(/startx) for systems that are unresponsive to the 'normal' call.
-    (setsid startx "$@" > "$startxlog" 2>&1)
+    (startx "$@" > "$startxlog"
 else
-    setsid startx "$@" > "$startxlog" 2>&1
+    startx "$@" > "$startxlog"
 fi
 
 # If wait(1) returns with a value >128, it was interrupted by kill(1),
