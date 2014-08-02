@@ -87,7 +87,7 @@ fi
 
 if $altstartx; then
     # Alternative method of calling setsid(/startx) for systems that are unresponsive to the 'normal' call.
-    (startx "$@" > "$startxlog"
+    (startx "$@" > "$startxlog")
 else
     startx "$@" > "$startxlog"
 fi
