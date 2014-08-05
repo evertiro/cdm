@@ -40,6 +40,7 @@ warn() { (printf ' \033[01;33m*\033[00m '; echo "$name: $*") > /dev/stderr; }
 error() { (printf ' \033[01;31m*\033[00m '; echo "$name: $*") > /dev/stderr; }
 exitnormal() { exit 0; }
 exiterror() { sleep 1; exit 1; }
+exitcancel() { exit 2; }
 yesno()
 {
     [ -z "$1" ] && return 1
@@ -138,7 +139,7 @@ case "${#binlist[@]}" in
             --cancel-label ' Exit ' --menu 'Select session' 0 0 0 "${menu[@]}"
         )
         if [[ $? != 0 ]]; then
-            clear; exitnormal
+            clear; exitcancel
         fi
         clear
         let binindex-=countfrom
