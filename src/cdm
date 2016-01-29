@@ -67,6 +67,8 @@ elif [[ -f "$HOME/.cdmrc" ]]; then
     source "$HOME/.cdmrc"
 elif [[ -f /etc/cdmrc ]]; then
     source /etc/cdmrc
+elif [[ -f "$XDG_CONFIG_HOME/cdm/cdmrc" ]]; then
+    source "$XDG_CONFIG_HOME/cdm/cdmrc"
 fi
 
 # Default options.

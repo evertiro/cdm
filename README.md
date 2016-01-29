@@ -15,6 +15,7 @@ existing one:
     [RCFILE specified on command line]
     $HOME/.cdmrc
     /etc/cdmrc
+    $XDG_CONFIG_HOME/cdm/cdmrc
 
 To autostart cdm when you log in your account, copy the content of
 /usr/share/doc/cdm/profile.sh to the tail of your shell profile (~/.profile,
