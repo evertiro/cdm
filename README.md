@@ -14,6 +14,7 @@ existing one:
 
     [RCFILE specified on command line]
     $HOME/.cdmrc
+    $XDG_CONFIG_HOME/cdm/cdmrc
     /etc/cdmrc
 
 To autostart cdm when you log in your account, copy the content of
