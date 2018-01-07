@@ -65,8 +65,8 @@ if [[ -n "$1" ]]; then
     fi
 elif [[ -f "$HOME/.cdmrc" ]]; then
     source "$HOME/.cdmrc"
-elif [[ -f "$XDG_CONFIG_HOME/cdm/cdmrc" ]]; then
-    source "$XDG_CONFIG_HOME/cdm/cdmrc"
+elif [[ -f "${XDG_CONFIG_HOME:-$HOME/.config}/cdm/cdmrc" ]]; then
+    source "${XDG_CONFIG_HOME:-$HOME/.config}/cdm/cdmrc"
 elif [[ -f /etc/cdmrc ]]; then
     source /etc/cdmrc
 fi
