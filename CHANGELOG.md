@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - TBD
 ### Changed
 - Converted changelog to Keep a Changelog format.
+- Codebase cleanup.
+
+## [0.0.7] - 2018-04-17
+### Added
+- Optional output logging.
+- Uninstall script.
+
+### Changed
+- Check if directories exist before try to \'find\' files in them.
+- Add '/usr/share/xsessions' to comments as possible sessions location.
+- Fix passing multiple arguments to programs from Exec key from .desktop files.
+- Exit with return code 2 on dialog cancel.
+
+### Fixed
+- Respect XDG Base Directory Specification fallback.
 
 ## [0.0.6] - 2012-04-08
 ### Added
@@ -79,23 +94,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.1] - 2009-11-20
 ### Added
 - Failsafe to startup script that overrides execution if logged in as root.
-	
+
 ## [0.0.3] - 2009-11-18
 ### Changed
 - Fixed X incrementing function.
 - Fixed an issue with allowshutdown off and allowconsole on.
 - Code cleanup.
 - Fixed issue with profile.d execution order.
-	  
+
 ## [0.0.2] - 2009-11-10
 ### Added
 - Shutdown option.
 - Ability to set login shell (fix for some foreign layouts).
-	
+
 ## [0.0.1b] - 2009-11-09
 ### Changed
 - Minor feature addition.
 - No longer requires editing user files.
-	
+
 ## [0.0.1] - 2009-11-09
 - Initial release
