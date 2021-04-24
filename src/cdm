@@ -148,7 +148,7 @@ case "${#binlist[@]}" in
             clear; exitcancel
         fi
         clear
-        let binindex-=countfrom
+        (( binindex-=countfrom )) || true
         ;;
 esac
 
@@ -187,7 +187,7 @@ case ${flaglist[$binindex]} in
                 # Invalid MIT cookie.
                 [[ "$dpyinfo" == 'Invalid MIT'* ]]
             then
-                let display+=1
+				(( display++ )) || true
             else
                 break
             fi
