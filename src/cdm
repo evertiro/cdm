@@ -117,7 +117,7 @@ if [[ "${#binlist[@]}" == 0 && -d /usr/share/xsessions ]]; then
             # The .desktop files allow there Exec keys to use $PATH lookup.
             binitem="$(which $(cut -f 1 -d ' ' <<< ${execkey}))"
             # If which fails to return valid path, skip to next .desktop file.
-            if [[ $? != 0 ]]; then continue; fi
+            if $?; then continue; fi
             binlist+=("${binitem} $(cut -s -f 2- -d ' ' <<< ${execkey})")
             flaglist+=('X')
             namelist+=("${namekey}")
@@ -144,7 +144,7 @@ case "${#binlist[@]}" in
             --backtitle "$longname v$ver" --ok-label ' Select ' \
             --cancel-label ' Exit ' --menu 'Select session' 0 0 0 "${menu[@]}"
         )
-        if [[ $? != 0 ]]; then
+        if $?; then
             clear; exitcancel
         fi
         clear
