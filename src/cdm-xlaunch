@@ -67,7 +67,7 @@ done
 if $consolekit; then
     info 'waiting for ConsoleKit to register X session.'
     sleep "$cktimeout" & clockpid=$!
-    dbuspidfifo=$(mktemp --dry-run --tmpdir $name.XXXXXXXX)
+    dbuspidfifo=$(mktemp --dry-run --tmpdir "$name".XXXXXXXX)
     if ! mkfifo "$dbuspidfifo"; then
         error "failed to create FIFO \`$fifo'."
         exit 1
