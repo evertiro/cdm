@@ -74,7 +74,7 @@ if $consolekit; then
     fi
 
     (dbus-monitor --system 'type=signal,interface=org.freedesktop.ConsoleKit.Seat,member=SessionAdded' & echo $! > "$dbuspidfifo") |
-        sed -un 's@[[:space:]]*object path \"\(/[a-zA-Z0-9/]*\)\"@\1@p' | while read object; do
+        sed -un 's@[[:space:]]*object path \"\(/[a-zA-Z0-9/]*\)\"@\1@p' | while read -r object; do
             if dbus-send --system --print-reply --dest='org.freedesktop.ConsoleKit' "$object" 'org.freedesktop.ConsoleKit.Session.GetX11Display' |
                 grep -qF "$display"
             then
