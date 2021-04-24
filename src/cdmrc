@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=2034
 #
 # Example config file for cdm(1).
 # Values set here is the default as in cdm(1).
